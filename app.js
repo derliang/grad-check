@@ -6,7 +6,6 @@ const STORAGE_KEY = 'grad_check_app_data_v1';
 // 預設 108 課綱範本數據
 const DEFAULT_DATA = {
   currentGrade: 4, // 預設就讀 高二下 (Semester 4)
-  track: 'general_humanities', // 預設組別：文組普通班
   theme: 'light',
   subjects: [
     // === 高一上 (Sem 1) ===
@@ -79,33 +78,15 @@ const DEFAULT_DATA = {
 
 // 狀態管理 State
 let appState = {
-  currentGrade: 2, // 高一:1, 高二:2, 高三:3
-  activeSemTab: 3, // 1~6
-  track: 'general_humanities',
+  currentGrade: 4,
+  activeSemTab: 1,
   theme: 'light',
   subjects: []
 };
 
-// 依據教育部《高級中等學校學生學習評量辦法》：
-// 第一學期 (上學期)：八月一日至翌年一月三十一日 (8/1 ～ 1/31)
-// 第二學期 (下學期)：二月一日至七月三十一日 (2/1 ～ 7/31)
-function getAutoSemesterByDate(gradeNum) {
-  const now = new Date();
-  const month = now.getMonth() + 1; // 1 ~ 12
-  const isFirstSemester = (month >= 8 || month === 1);
-
-  if (gradeNum === 1) return isFirstSemester ? 1 : 2; // 高一上: 1, 高一下: 2
-  if (gradeNum === 2) return isFirstSemester ? 3 : 4; // 高二上: 3, 高二下: 4
-  if (gradeNum === 3) return isFirstSemester ? 5 : 6; // 高三上: 5, 高三下: 6
-  return isFirstSemester ? 3 : 4;
-}
-
 // 初始化 App
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromLocal();
-  if (!appState.activeSemTab) {
-    appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 2);
-  }
   initTheme();
   bindEvents();
   renderAll();
@@ -146,28 +127,14 @@ function initTheme() {
 
 // 綁定事件監聽器
 function bindEvents() {
-  // 當前就讀年級 Selector
+  // 當前就讀學期 Selector
   const gradeSelect = document.getElementById('currentGradeSelect');
-  if (gradeSelect) {
-    gradeSelect.value = appState.currentGrade || 2;
-    gradeSelect.addEventListener('change', (e) => {
-      appState.currentGrade = parseInt(e.target.value, 10);
-      appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade);
-      saveStateToLocal();
-      renderAll();
-    });
-  }
-
-  // 班別與組別 Selector
-  const trackSelect = document.getElementById('trackSelect');
-  if (trackSelect) {
-    trackSelect.value = appState.track || 'general_humanities';
-    trackSelect.addEventListener('change', (e) => {
-      appState.track = e.target.value;
-      saveStateToLocal();
-      renderAll();
-    });
-  }
+  gradeSelect.value = appState.currentGrade;
+  gradeSelect.addEventListener('change', (e) => {
+    appState.currentGrade = parseInt(e.target.value, 10);
+    saveStateToLocal();
+    renderAll();
+  });
 
   // 學期 Tab 切換
   const semesterNav = document.getElementById('semesterNav');
@@ -269,7 +236,7 @@ function renderDashboard() {
 
 // 2. 畢業學習預警計算演算法 (Graduation Warning System)
 function renderWarningCard() {
-  const currentSem = getAutoSemesterByDate(appState.currentGrade); // 1 ~ 6 依目前月份動態判定當前學期
+  const currentSem = appState.currentGrade; // 1 ~ 6
 
   let earnedTotal = 0;
   let earnedRequired = 0;
