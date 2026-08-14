@@ -86,14 +86,18 @@ let appState = {
   subjects: []
 };
 
-// 自動根據當前月份判斷學期 (8月～1月為上學期，2月～7月為下學期)
+// 依據教育部《高級中等學校學生學習評量辦法》：
+// 第一學期 (上學期)：八月一日至翌年一月三十一日 (8/1 ～ 1/31)
+// 第二學期 (下學期)：二月一日至七月三十一日 (2/1 ～ 7/31)
 function getAutoSemesterByDate(gradeNum) {
-  const month = new Date().getMonth() + 1; // 1~12
-  const isFall = (month >= 8 || month === 1);
-  if (gradeNum === 1) return isFall ? 1 : 2;
-  if (gradeNum === 2) return isFall ? 3 : 4;
-  if (gradeNum === 3) return isFall ? 5 : 6;
-  return isFall ? 3 : 4;
+  const now = new Date();
+  const month = now.getMonth() + 1; // 1 ~ 12
+  const isFirstSemester = (month >= 8 || month === 1);
+
+  if (gradeNum === 1) return isFirstSemester ? 1 : 2; // 高一上: 1, 高一下: 2
+  if (gradeNum === 2) return isFirstSemester ? 3 : 4; // 高二上: 3, 高二下: 4
+  if (gradeNum === 3) return isFirstSemester ? 5 : 6; // 高三上: 5, 高三下: 6
+  return isFirstSemester ? 3 : 4;
 }
 
 // 初始化 App
