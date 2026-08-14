@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=23.0">
+  <link rel="stylesheet" href="style.css?v=24.0">
 </head>
 <body>
   <div class="app-container">
@@ -129,12 +129,16 @@
       </div>
     </section>
 
-    <!-- Main Content Area: Subject List for Selected Semester (取得學分檢核) -->
+    <!-- Main Content Area: Subject List for Selected Semester (含鎖定提示與分區) -->
     <main class="main-content">
       <div class="semester-header-bar">
         <div class="sem-title-box">
           <h2 class="current-sem-title" id="currentSemTitle">高一上 取得學分檢核</h2>
           <span class="current-sem-stats" id="currentSemStats">已取得 0% (0/0 學分, 0個科目)</span>
+        </div>
+        <!-- 未來學期鎖定防呆提示 -->
+        <div id="semLockNotice" class="sem-lock-notice" style="display: none;">
+          🔒 尚未就讀之未來學期（僅供預覽課程地圖，勾選開關已防呆鎖定）
         </div>
       </div>
 
@@ -189,6 +193,6 @@
     <!-- Rendered dynamically by JS during export -->
   </div>
 
-  <script src="app.js?v=23.0"></script>
+  <script src="app.js?v=24.0"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心樣式表 */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心樣式表 (v24.0) */
 
 :root {
   /* Color Palette - Light Macaron Theme */
@@ -489,6 +489,42 @@ html, body {
   white-space: nowrap;
 }
 
+/* 未來學期防呆鎖定提示欄 */
+.sem-lock-notice {
+  margin-top: 6px;
+  background: #fff8e7;
+  border: 1px dashed #ffa502;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #d63031;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 高二高三「共同科目」與「分流科目」分區標題 */
+.section-divider-title {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--primary);
+  margin: 12px 0 6px;
+  padding: 4px 8px;
+  background: rgba(108, 92, 231, 0.06);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.section-divider-title.track-section {
+  color: #0984e3;
+  background: rgba(9, 132, 227, 0.06);
+  border-left-color: #0984e3;
+}
+
 /* Subject List Items */
 .subject-list {
   display: flex;
@@ -548,7 +584,7 @@ html, body {
   flex-shrink: 0;
 }
 
-/* 精緻膠囊貼紙標籤 (必修, 選修, 其他必選修) */
+/* 精緻膠囊貼紙標籤 */
 .tag-cat {
   font-size: 0.7rem;
   font-weight: 800;
@@ -625,6 +661,25 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(20px);
+}
+
+/* 未來學期鎖定狀態開關 🔒 */
+.toggle-switch.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.toggle-switch.disabled .slider {
+  cursor: not-allowed;
+  background-color: #b2bec3;
+}
+
+.toggle-switch.disabled .slider:after {
+  content: "🔒";
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  font-size: 0.72rem;
 }
 
 /* 📓 Notebook Index Divider Tabs */
@@ -765,7 +820,7 @@ input:checked + .slider:before {
   color: #ff7675;
 }
 
-/* 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 Print Document Styles (含分頁防切割規則) */
+/* 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 Print Document Styles */
 .export-report-document {
   width: 800px;
   background: #ffffff;
@@ -779,7 +834,6 @@ input:checked + .slider:before {
   border-bottom: 3px solid #6c5ce7;
   padding-bottom: 14px;
   margin-bottom: 18px;
-  page-break-inside: avoid;
 }
 
 .rpt-main-title {
@@ -808,7 +862,6 @@ input:checked + .slider:before {
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 18px;
-  page-break-inside: avoid;
 }
 
 .rpt-dash-card {
@@ -846,7 +899,6 @@ input:checked + .slider:before {
   margin-bottom: 20px;
   font-size: 0.85rem;
   font-weight: 700;
-  page-break-inside: avoid;
 }
 
 .rpt-warning-card.state-danger {
@@ -871,15 +923,12 @@ input:checked + .slider:before {
   margin-bottom: 20px;
 }
 
-/* 分頁防切割關鍵規則 (Page-Break Avoidance) */
 .sem-matrix-box {
   border: 1px solid #eef2f7;
   border-radius: 10px;
   padding: 12px;
   background: #ffffff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-  page-break-inside: avoid;
-  break-inside: avoid;
 }
 
 .sem-matrix-title {
@@ -924,5 +973,4 @@ input:checked + .slider:before {
   font-weight: 700;
   color: #d63031;
   line-height: 1.4;
-  page-break-inside: avoid;
 }
