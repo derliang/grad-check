@@ -5,7 +5,8 @@ const STORAGE_KEY = 'grad_check_app_data_v1';
 
 // 預設 108 課綱範本數據
 const DEFAULT_DATA = {
-  currentGrade: 4, // 預設就讀 高二下 (Semester 4)
+  currentGrade: 2, // 高一:1, 高二:2, 高三:3
+  track: 'exp_science',
   theme: 'light',
   subjects: [
     // === 高一上 (Sem 1) ===
@@ -78,15 +79,33 @@ const DEFAULT_DATA = {
 
 // 狀態管理 State
 let appState = {
-  currentGrade: 4,
-  activeSemTab: 1,
+  currentGrade: 2, // 高一:1, 高二:2, 高三:3
+  activeSemTab: 3, // 1~6
+  track: 'general_humanities',
   theme: 'light',
   subjects: []
 };
 
+// 依據教育部《高級中等學校學生學習評量辦法》：
+// 第一學期 (上學期)：八月一日至翌年一月三十一日 (8/1 ～ 1/31)
+// 第二學期 (下學期)：二月一日至七月三十一日 (2/1 ～ 7/31)
+function getAutoSemesterByDate(gradeNum) {
+  const now = new Date();
+  const month = now.getMonth() + 1; // 1 ~ 12
+  const isFirstSemester = (month >= 8 || month === 1);
+
+  if (gradeNum === 1) return isFirstSemester ? 1 : 2; // 高一上: 1, 高一下: 2
+  if (gradeNum === 2) return isFirstSemester ? 3 : 4; // 高二上: 3, 高二下: 4
+  if (gradeNum === 3) return isFirstSemester ? 5 : 6; // 高三上: 5, 高三下: 6
+  return isFirstSemester ? 3 : 4;
+}
+
 // 初始化 App
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromLocal();
+  if (!appState.activeSemTab) {
+    appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 2);
+  }
   initTheme();
   bindEvents();
   renderAll();
@@ -127,14 +146,28 @@ function initTheme() {
 
 // 綁定事件監聽器
 function bindEvents() {
-  // 當前就讀學期 Selector
+  // 當前就讀年級 Selector
   const gradeSelect = document.getElementById('currentGradeSelect');
-  gradeSelect.value = appState.currentGrade;
-  gradeSelect.addEventListener('change', (e) => {
-    appState.currentGrade = parseInt(e.target.value, 10);
-    saveStateToLocal();
-    renderAll();
-  });
+  if (gradeSelect) {
+    gradeSelect.value = appState.currentGrade || 2;
+    gradeSelect.addEventListener('change', (e) => {
+      appState.currentGrade = parseInt(e.target.value, 10);
+      appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade);
+      saveStateToLocal();
+      renderAll();
+    });
+  }
+
+  // 班別與組別 Selector
+  const trackSelect = document.getElementById('trackSelect');
+  if (trackSelect) {
+    trackSelect.value = appState.track || 'exp_science';
+    trackSelect.addEventListener('change', (e) => {
+      appState.track = e.target.value;
+      saveStateToLocal();
+      renderAll();
+    });
+  }
 
   // 學期 Tab 切換
   const semesterNav = document.getElementById('semesterNav');
@@ -163,6 +196,12 @@ function bindEvents() {
 
   document.getElementById('settingsBtn').addEventListener('click', () => openModal('settingsModal'));
   document.getElementById('closeSettingsBtn').addEventListener('click', () => closeModal('settingsModal'));
+
+  // PNG 與 PDF 下載功能
+  const pngBtn = document.getElementById('exportPngBtn');
+  if (pngBtn) pngBtn.addEventListener('click', exportPng);
+  const pdfBtn = document.getElementById('exportPdfBtn');
+  if (pdfBtn) pdfBtn.addEventListener('click', exportPdf);
 
   // 備份與重置
   document.getElementById('resetDataBtn').addEventListener('click', handleResetData);
@@ -236,7 +275,7 @@ function renderDashboard() {
 
 // 2. 畢業學習預警計算演算法 (Graduation Warning System)
 function renderWarningCard() {
-  const currentSem = appState.currentGrade; // 1 ~ 6
+  const currentSem = getAutoSemesterByDate(appState.currentGrade); // 1 ~ 6 依目前月份動態判定當前學期
 
   let earnedTotal = 0;
   let earnedRequired = 0;
@@ -547,6 +586,60 @@ function triggerConfetti() {
       spread: 70,
       origin: { y: 0.6 }
     });
+  }
+}
+
+// 🖼️ 下載 PNG 功能 (html2canvas)
+async function exportPng() {
+  try {
+    const target = document.querySelector('.app-container');
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#f6f8fd',
+      logging: false
+    });
+    const link = document.createElement('a');
+    link.download = `畢業啦_學分自我檢核表_${new Date().toISOString().slice(0,10)}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    alert('圖片匯出失敗：' + err.message);
+  }
+}
+
+// 📄 下載 PDF 功能 (jsPDF + html2canvas)
+async function exportPdf() {
+  try {
+    const target = document.querySelector('.app-container');
+    const canvas = await html2canvas(target, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`畢業啦_學分自我檢核表_${new Date().toISOString().slice(0,10)}.pdf`);
+  } catch (err) {
+    alert('PDF 匯出失敗：' + err.message);
   }
 }
 
