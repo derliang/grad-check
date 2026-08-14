@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=10.0">
+  <link rel="stylesheet" href="style.css?v=11.0">
 </head>
 <body>
   <div class="app-container">
@@ -41,19 +41,19 @@
       <div class="status-row">
         <div class="status-label">
           <span class="status-icon">🎒</span>
-          <span>就讀年級：</span>
+          <span>年級：</span>
         </div>
         <select id="currentGradeSelect" class="grade-select">
-          <option value="1">高一 (一年級)</option>
-          <option value="2" selected>高二 (二年級)</option>
-          <option value="3">高三 (三年級)</option>
+          <option value="1">高一</option>
+          <option value="2" selected>高二</option>
+          <option value="3">高三</option>
         </select>
       </div>
       
       <div class="status-row">
         <div class="status-label">
           <span class="status-icon">🏫</span>
-          <span>班別選擇：</span>
+          <span>班別：</span>
         </div>
         <select id="trackSelect" class="track-select">
           <!-- Dynamic JS Population based on Grade -->
@@ -174,12 +174,11 @@
     <footer class="app-footer">
       <p class="footer-quote">✨ 每一分努力，都是邁向畢業的腳步！ ✨</p>
       <div class="footer-links">
-        <button id="resetDataBtn" class="text-link">重置為預設範本</button>
+        <button id="resetDataBtn" class="reset-prominent-btn">🔄 重置</button>
       </div>
-      <p class="copyright">畢業啦～ App • 純 Local 離線保存 • 108 課綱</p>
     </footer>
   </div>
 
-  <script src="app.js?v=10.0"></script>
+  <script src="app.js?v=11.0"></script>
 </body>
 </html>
