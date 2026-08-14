@@ -418,97 +418,100 @@ html, body {
 
 /* Main Content: Subject List */
 .main-content {
-  padding: 12px 16px;
+  padding: 10px 14px;
   flex: 1;
 }
 
 .semester-header-bar {
+  margin-bottom: 8px;
+}
+
+.sem-title-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  width: 100%;
 }
 
 .current-sem-title {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 900;
   color: var(--text-main);
+  white-space: nowrap;
 }
 
 .current-sem-stats {
   font-size: 0.78rem;
+  font-weight: 700;
   color: var(--text-sub);
-  display: block;
+  white-space: nowrap;
 }
 
-/* Subject List Items */
+/* Subject List Items (Single Row Compact Design) */
 .subject-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 
 .subject-item {
   background: var(--card-bg);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
+  border-radius: 12px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  gap: 8px;
+  transition: border-color 0.2s ease;
 }
 
 .subject-item.passed {
-  border-left: 5px solid var(--elec-color);
+  border-left: 4px solid var(--elec-color);
 }
 
 .subject-item.failed {
-  border-left: 5px solid #dfe6e9;
+  border-left: 4px solid #dfe6e9;
   opacity: 0.85;
 }
 
-.sub-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  padding-right: 12px;
-}
-
-.sub-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sub-name {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--text-main);
-}
-
-.sub-meta {
+.sub-inline-row {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sub-name {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .tag-credit {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 6px;
   background: var(--bg-color);
   color: var(--text-sub);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tag-cat {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tag-cat.required {

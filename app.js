@@ -430,14 +430,10 @@ function renderSubjectList() {
 
   container.innerHTML = subjects.map(sub => `
     <div class="subject-item ${sub.passed ? 'passed' : 'failed'}" data-id="${sub.id}">
-      <div class="sub-info">
-        <div class="sub-title-row">
-          <span class="sub-name">${escapeHtml(sub.name)}</span>
-        </div>
-        <div class="sub-meta">
-          <span class="tag-credit">${sub.credits} 學分</span>
-          <span class="tag-cat ${sub.cat}">${getCatText(sub.cat)}</span>
-        </div>
+      <div class="sub-inline-row">
+        <span class="sub-name">${escapeHtml(sub.name)}</span>
+        <span class="tag-credit">${sub.credits}學分</span>
+        <span class="tag-cat ${sub.cat}">${getCatText(sub.cat)}</span>
       </div>
       <div class="switch-wrapper">
         <label class="toggle-switch" aria-label="切換 ${escapeHtml(sub.name)} 學分取得狀態">
