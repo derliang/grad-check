@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v21.0 百分比結算版) */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v22.0 精緻標籤版) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
@@ -453,12 +453,12 @@ function renderSemesterTabs() {
   });
 }
 
-// 4. 渲染特定學期科目列表 (含高質感百分比達成率計算與 100% 慶祝圖示)
+// 4. 渲染特定學期科目列表 (更名為：取得學分檢核，含 100% 高彩彩蛋)
 function renderSubjectList() {
   if (!dom.subjectListContainer) return;
 
   const currentSem = appState.activeSemTab;
-  if (dom.currentSemTitle) dom.currentSemTitle.textContent = `${getSemText(currentSem)} 科目檢核`;
+  if (dom.currentSemTitle) dom.currentSemTitle.textContent = `${getSemText(currentSem)} 取得學分檢核`;
 
   const subjects = sortSubjects(appState.subjects.filter(s => s.sem === currentSem));
   const totalCredits = subjects.reduce((sum, s) => sum + s.credits, 0);
@@ -468,7 +468,7 @@ function renderSubjectList() {
 
   if (dom.currentSemStats) {
     if (pct === 100 && totalCredits > 0) {
-      dom.currentSemStats.textContent = `🎉 已取得 100% (${passedCredits}/${totalCredits} 學分, ${subjects.length}個科目)`;
+      dom.currentSemStats.innerHTML = `<span style="color:#00b894; font-weight:800;">🎉 已取得 100%</span> (${passedCredits}/${totalCredits} 學分, ${subjects.length}個科目)`;
     } else {
       dom.currentSemStats.textContent = `已取得 ${pct}% (${passedCredits}/${totalCredits} 學分, ${subjects.length}個科目)`;
     }

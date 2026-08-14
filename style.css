@@ -130,7 +130,7 @@ html, body {
   color: var(--text-sub);
   display: block;
   margin-top: 1px;
-  white-space: nowrap; /* 100% 絕不換行 */
+  white-space: nowrap;
 }
 
 .header-actions {
@@ -140,7 +140,7 @@ html, body {
   flex-shrink: 0;
 }
 
-/* Cute Pill Buttons - 強制單行不截斷 */
+/* Cute Pill Buttons */
 .cute-pill-btn {
   padding: 5px 8px;
   border-radius: 12px;
@@ -154,7 +154,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 3px;
-  white-space: nowrap; /* 100% 絕不換行 */
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
@@ -548,28 +548,33 @@ html, body {
   flex-shrink: 0;
 }
 
+/* 精緻膠囊貼紙標籤 (必修, 選修, 其他必選修) */
 .tag-cat {
   font-size: 0.7rem;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 6px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .tag-cat.required {
-  background: var(--req-bg);
-  color: var(--req-color);
+  background: #fff0f3;
+  color: #ff4757;
+  border: 1px solid rgba(255, 71, 87, 0.25);
 }
 
 .tag-cat.elective {
-  background: var(--elec-bg);
-  color: var(--elec-color);
+  background: #e8faf1;
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.25);
 }
 
 .tag-cat.other {
-  background: var(--other-bg);
-  color: var(--other-color);
+  background: #fff8e7;
+  color: #ffa502;
+  border: 1px solid rgba(255, 165, 2, 0.25);
 }
 
 /* Switch Wrapper */
