@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v19.0) */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v20.0 還原極致美觀 PDF 版) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
@@ -657,7 +657,7 @@ async function exportPngReport() {
   }
 }
 
-// 📄 匯出原生矢量文字型 PDF 報告書 (使用 html2pdf 重構引擎，支援可選取複製文字與智慧分頁避切割)
+// 📄 匯出全 6 學期精美 A4 PDF 報告書 (還原 v18.0 極致美觀 200% 超高解析度繪製)
 async function exportPdfReport() {
   try {
     const wrapper = dom.exportReportWrapper;
@@ -668,53 +668,36 @@ async function exportPdfReport() {
 
     const element = wrapper.querySelector('.export-report-document');
 
-    if (typeof html2pdf === 'function') {
-      const opt = {
-        margin: [6, 6, 6, 6],
-        filename: `畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
 
-      await html2pdf().set(opt).from(element).save();
+    wrapper.style.display = 'none';
+    wrapper.innerHTML = '';
 
-      wrapper.style.display = 'none';
-      wrapper.innerHTML = '';
-    } else {
-      // Fallback
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-      wrapper.style.display = 'none';
-      wrapper.innerHTML = '';
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
 
-      const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save(`畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`);
     }
+
+    pdf.save(`畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`);
   } catch (err) {
     alert('PDF 報告書匯出失敗：' + err.message);
   }
