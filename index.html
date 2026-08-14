@@ -9,14 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-  
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- html2canvas & jsPDF for PNG/PDF Export -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
-  <link rel="stylesheet" href="style.css?v=2.0">
+
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
   <div class="app-container">
@@ -33,6 +32,7 @@
         <button id="exportPngBtn" class="action-pill-btn" title="下載 PNG 圖片">🖼️ 圖片</button>
         <button id="exportPdfBtn" class="action-pill-btn" title="下載 PDF 文件">📄 PDF</button>
         <button id="themeToggleBtn" class="icon-btn" title="切換主題" aria-label="切換主題">🌙</button>
+        <button id="settingsBtn" class="icon-btn" title="設定與資料管理" aria-label="設定與資料管理">⚙️</button>
       </div>
     </header>
 
@@ -41,7 +41,7 @@
       <div class="status-row">
         <div class="status-label">
           <span class="status-icon">🎒</span>
-          <span>就讀年級：</span>
+          <span>就讀學期：</span>
         </div>
         <select id="currentGradeSelect" class="grade-select">
           <option value="1">高一 (一年級)</option>
@@ -128,6 +128,18 @@
       </div>
     </section>
 
+    <!-- Semester Tab Bar (6 Semesters) -->
+    <nav class="semester-nav-wrapper">
+      <div class="semester-nav" id="semesterNav">
+        <button class="sem-btn active" data-sem="1">高一上 <span class="sem-badge" id="semBadge1">0</span></button>
+        <button class="sem-btn" data-sem="2">高一下 <span class="sem-badge" id="semBadge2">0</span></button>
+        <button class="sem-btn" data-sem="3">高二上 <span class="sem-badge" id="semBadge3">0</span></button>
+        <button class="sem-btn" data-sem="4">高二下 <span class="sem-badge" id="semBadge4">0</span></button>
+        <button class="sem-btn" data-sem="5">高三上 <span class="sem-badge" id="semBadge5">0</span></button>
+        <button class="sem-btn" data-sem="6">高三下 <span class="sem-badge" id="semBadge6">0</span></button>
+      </div>
+    </nav>
+
     <!-- Main Content Area: Subject List for Selected Semester -->
     <main class="main-content">
       <div class="semester-header-bar">
@@ -135,6 +147,7 @@
           <h2 class="current-sem-title" id="currentSemTitle">高一上 學期科目</h2>
           <span class="current-sem-stats" id="currentSemStats">已取得 0 / 0 學分</span>
         </div>
+        <button id="addSubjectBtn" class="add-btn">+ 新增科目</button>
       </div>
 
       <!-- Subject Items Grid/List -->
@@ -143,46 +156,99 @@
       </div>
     </main>
 
-    <!-- Notebook Index Divider Tabs (Fixed Bottom 筆記本側邊/下方索引切換卡片) -->
-    <div class="notebook-tabs-sticky-wrapper">
-      <div class="notebook-index-tabs" id="semesterNav">
-        <button class="notebook-tab tab-1 active" data-sem="1">
-          <span class="tab-label">高一上</span>
-          <span class="tab-badge" id="semBadge1">0</span>
-        </button>
-        <button class="notebook-tab tab-2" data-sem="2">
-          <span class="tab-label">高一下</span>
-          <span class="tab-badge" id="semBadge2">0</span>
-        </button>
-        <button class="notebook-tab tab-3" data-sem="3">
-          <span class="tab-label">高二上</span>
-          <span class="tab-badge" id="semBadge3">0</span>
-        </button>
-        <button class="notebook-tab tab-4" data-sem="4">
-          <span class="tab-label">高二下</span>
-          <span class="tab-badge" id="semBadge4">0</span>
-        </button>
-        <button class="notebook-tab tab-5" data-sem="5">
-          <span class="tab-label">高三上</span>
-          <span class="tab-badge" id="semBadge5">0</span>
-        </button>
-        <button class="notebook-tab tab-6" data-sem="6">
-          <span class="tab-label">高三下</span>
-          <span class="tab-badge" id="semBadge6">0</span>
-        </button>
-      </div>
-    </div>
-
     <!-- Footer Information -->
     <footer class="app-footer">
       <p class="footer-quote">✨ 每一分努力，都是邁向畢業的腳步！ ✨</p>
       <div class="footer-links">
         <button id="resetDataBtn" class="text-link">重置為預設範本</button>
+        <span>•</span>
+        <button id="exportJsonBtn" class="text-link">備份資料 (JSON)</button>
+        <span>•</span>
+        <button id="importJsonBtn" class="text-link">匯入備份</button>
       </div>
-      <p class="copyright">畢業啦～ App • 純 Local 離線保存 • 108 課綱</p>
+      <p class="copyright">畢業啦～ App • 純 Local 離線無雲端 • 支援 108 課綱</p>
     </footer>
   </div>
 
-  <script src="app.js?v=2.0"></script>
+  <!-- Modal: Add / Edit Subject -->
+  <div class="modal-overlay" id="subjectModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">新增科目學分</h3>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="subjectForm">
+          <input type="hidden" id="editSubjectId" value="">
+          <div class="form-group">
+            <label for="subNameInput">科目名稱</label>
+            <input type="text" id="subNameInput" placeholder="例如：加深加廣選修" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="subCreditsInput">學分數</label>
+              <input type="number" id="subCreditsInput" min="1" max="10" value="2" required>
+            </div>
+            <div class="form-group">
+              <label for="subCategorySelect">類別</label>
+              <select id="subCategorySelect">
+                <option value="required">部定必修 (目標102)</option>
+                <option value="elective">選修學分 (目標40)</option>
+                <option value="other">校訂與其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="cancelModalBtn">取消</button>
+            <button type="submit" class="btn btn-primary" id="saveSubjectBtn">儲存科目</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings & JSON Import -->
+  <div class="modal-overlay" id="settingsModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ 設定與資料管理</h3>
+        <button class="modal-close" id="closeSettingsBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <h4>🎓 畢業標準設定 (108課綱預設)</h4>
+          <div class="setting-item">
+            <span>畢業總學分門檻</span>
+            <strong>150 學分</strong>
+          </div>
+          <div class="setting-item">
+            <span>部定必修合格門檻</span>
+            <strong>102 學分</strong>
+          </div>
+          <div class="setting-item">
+            <span>選修學分合格門檻</span>
+            <strong>40 學分</strong>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4>📦 資料備份與移轉</h4>
+          <p class="setting-desc">資料均存在此手機離線空間，不會上傳任何伺服器。</p>
+          <div class="setting-actions">
+            <button id="modalExportBtn" class="btn btn-outline">📥 下載備份 (JSON)</button>
+            <button id="modalImportBtn" class="btn btn-outline">📤 匯入備份 (JSON)</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none">
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4>🌐 部署與分享</h4>
+          <p class="setting-desc">本程式已透過 GitHub Pages 免費發布上線。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=3.0"></script>
 </body>
 </html>
