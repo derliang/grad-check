@@ -1,9 +1,9 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - JavaScript 核心邏輯 */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (效能與正確性優化版) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
 
-// 預設 108 課綱範本數據
+// 預設 108 課綱範本數據 (高一31+31=62, 高二30+30=60, 高三30+30=60, 六學期總計182學分)
 const DEFAULT_DATA = {
   currentGrade: 2, // 高一:1, 高二:2, 高三:3
   track: 'exp_math_science', // 預設組別：數理實驗班
@@ -36,8 +36,8 @@ const DEFAULT_DATA = {
     { id: 's2_8', sem: 2, name: '生活科技', credits: 1, cat: 'required', passed: true },
     { id: 's2_9', sem: 2, name: '家政', credits: 1, cat: 'required', passed: true },
     { id: 's2_10', sem: 2, name: '體育 II', credits: 2, cat: 'required', passed: true },
-    { id: 's2_11', sem: 2, name: '國際校本-國際篇', credits: 1, cat: 'required', passed: true }, // 校訂必修歸類為必修
-    { id: 's2_12', sem: 2, name: '靈智教育-服務與思辨', credits: 1, cat: 'required', passed: true }, // 校訂必修歸類為必修
+    { id: 's2_11', sem: 2, name: '國際校本-國際篇', credits: 1, cat: 'required', passed: true },
+    { id: 's2_12', sem: 2, name: '靈智教育-服務與思辨', credits: 1, cat: 'required', passed: true },
     { id: 's2_13', sem: 2, name: '多元選修 II', credits: 2, cat: 'elective', passed: true },
 
     // === 高二上 (Sem 3) - 30 學分 ===
@@ -106,6 +106,7 @@ const TRACK_OPTIONS_BY_GRADE = {
   ]
 };
 
+// 狀態管理 State
 let appState = {
   currentGrade: 2,
   activeSemTab: 3,
@@ -114,6 +115,10 @@ let appState = {
   subjects: []
 };
 
+// DOM 快取 (DOM Cache for Performance)
+const dom = {};
+
+// 教育部官方學期日期判定 (8/1~1/31 第一學期, 2/1~7/31 第二學期)
 function getAutoSemesterByDate(gradeNum) {
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -125,25 +130,75 @@ function getAutoSemesterByDate(gradeNum) {
   return isFirstSemester ? 3 : 4;
 }
 
+// 頁面初始化入口
 document.addEventListener('DOMContentLoaded', () => {
+  cacheDomElements();
   loadStateFromLocal();
+  
   if (!appState.activeSemTab) {
     appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 2);
   }
+
   renderTrackOptions();
   initTheme();
   bindEvents();
   renderAll();
 });
 
+// 快取常用 DOM 節點
+function cacheDomElements() {
+  dom.totalEarnedVal = document.getElementById('totalEarnedVal');
+  dom.reqEarnedVal = document.getElementById('reqEarnedVal');
+  dom.elecEarnedVal = document.getElementById('elecEarnedVal');
+  dom.otherEarnedVal = document.getElementById('otherEarnedVal');
+
+  dom.reqProgressFill = document.getElementById('reqProgressFill');
+  dom.elecProgressFill = document.getElementById('elecProgressFill');
+  dom.otherProgressFill = document.getElementById('otherProgressFill');
+
+  dom.dashShortageBadge = document.getElementById('dashShortageBadge');
+
+  dom.warningCard = document.getElementById('warningCard');
+  dom.warningLevelPill = document.getElementById('warningLevelPill');
+  dom.warningCalcSummary = document.getElementById('warningCalcSummary');
+  dom.warningMessage = document.getElementById('warningMessage');
+  dom.warningDetails = document.getElementById('warningDetails');
+
+  dom.currentSemTitle = document.getElementById('currentSemTitle');
+  dom.currentSemStats = document.getElementById('currentSemStats');
+  dom.subjectListContainer = document.getElementById('subjectListContainer');
+  dom.semesterNav = document.getElementById('semesterNav');
+
+  dom.currentGradeSelect = document.getElementById('currentGradeSelect');
+  dom.trackSelect = document.getElementById('trackSelect');
+  dom.themeToggleBtn = document.getElementById('themeToggleBtn');
+  dom.exportPngBtn = document.getElementById('exportPngBtn');
+  dom.exportPdfBtn = document.getElementById('exportPdfBtn');
+  dom.resetDataBtn = document.getElementById('resetDataBtn');
+  dom.exportReportWrapper = document.getElementById('exportReportWrapper');
+}
+
+// 載入 LocalStorage (具備欄位完整性驗證)
 function loadStateFromLocal() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       appState = { ...DEFAULT_DATA, ...parsed };
+      
+      // 驗證 subjects 陣列合法性
+      if (!Array.isArray(appState.subjects) || appState.subjects.length === 0) {
+        appState.subjects = JSON.parse(JSON.stringify(DEFAULT_DATA.subjects));
+      } else {
+        // 修復可能缺失欄位的舊資料
+        appState.subjects.forEach(sub => {
+          if (typeof sub.passed !== 'boolean') sub.passed = false;
+          if (typeof sub.credits !== 'number') sub.credits = 2;
+          if (!['required', 'elective', 'other'].includes(sub.cat)) sub.cat = 'other';
+        });
+      }
     } catch (e) {
-      console.error('LocalStorage parse error, using default:', e);
+      console.error('LocalStorage 讀取失敗，還原至預設設定:', e);
       appState = JSON.parse(JSON.stringify(DEFAULT_DATA));
     }
   } else {
@@ -152,28 +207,34 @@ function loadStateFromLocal() {
   }
 }
 
+// 儲存至 LocalStorage
 function saveStateToLocal() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-}
-
-function initTheme() {
-  if (appState.theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('themeToggleBtn').textContent = '☀️';
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    document.getElementById('themeToggleBtn').textContent = '🌙';
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  } catch (e) {
+    console.error('LocalStorage 儲存失敗:', e);
   }
 }
 
+// 初始化主題
+function initTheme() {
+  if (appState.theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (dom.themeToggleBtn) dom.themeToggleBtn.textContent = '☀️';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    if (dom.themeToggleBtn) dom.themeToggleBtn.textContent = '🌙';
+  }
+}
+
+// 動態依年級渲染班別選單
 function renderTrackOptions() {
-  const select = document.getElementById('trackSelect');
-  if (!select) return;
+  if (!dom.trackSelect) return;
 
   const currentGrade = appState.currentGrade || 2;
   const options = TRACK_OPTIONS_BY_GRADE[currentGrade] || TRACK_OPTIONS_BY_GRADE[2];
 
-  select.innerHTML = options.map(opt => `
+  dom.trackSelect.innerHTML = options.map(opt => `
     <option value="${opt.value}">${opt.label}</option>
   `).join('');
 
@@ -181,14 +242,14 @@ function renderTrackOptions() {
   if (!isValidTrack) {
     appState.track = options[0].value;
   }
-  select.value = appState.track;
+  dom.trackSelect.value = appState.track;
 }
 
+// 綁定全域事件 (事件委派 Event Delegation 最佳化，避免重複監聽記憶體洩漏)
 function bindEvents() {
-  const gradeSelect = document.getElementById('currentGradeSelect');
-  if (gradeSelect) {
-    gradeSelect.value = appState.currentGrade || 2;
-    gradeSelect.addEventListener('change', (e) => {
+  if (dom.currentGradeSelect) {
+    dom.currentGradeSelect.value = appState.currentGrade || 2;
+    dom.currentGradeSelect.addEventListener('change', (e) => {
       appState.currentGrade = parseInt(e.target.value, 10);
       appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade);
       renderTrackOptions();
@@ -197,39 +258,53 @@ function bindEvents() {
     });
   }
 
-  const trackSelect = document.getElementById('trackSelect');
-  if (trackSelect) {
-    trackSelect.addEventListener('change', (e) => {
+  if (dom.trackSelect) {
+    dom.trackSelect.addEventListener('change', (e) => {
       appState.track = e.target.value;
       saveStateToLocal();
       renderAll();
     });
   }
 
-  const semesterNav = document.getElementById('semesterNav');
-  if (semesterNav) {
-    semesterNav.addEventListener('click', (e) => {
+  // 事件委派：學期 Tab 切換
+  if (dom.semesterNav) {
+    dom.semesterNav.addEventListener('click', (e) => {
       const btn = e.target.closest('.notebook-tab');
       if (btn) {
         const sem = parseInt(btn.dataset.sem, 10);
-        appState.activeSemTab = sem;
-        renderSemesterTabs();
-        renderSubjectList();
+        if (appState.activeSemTab !== sem) {
+          appState.activeSemTab = sem;
+          renderSemesterTabs();
+          renderSubjectList();
+        }
       }
     });
   }
 
-  document.getElementById('themeToggleBtn').addEventListener('click', () => {
-    appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
-    saveStateToLocal();
-    initTheme();
-  });
+  // 事件委派：科目勾選切換 (Single Delegation)
+  if (dom.subjectListContainer) {
+    dom.subjectListContainer.addEventListener('change', (e) => {
+      if (e.target.classList.contains('sub-toggle-checkbox')) {
+        const id = e.target.dataset.id;
+        toggleSubjectPassed(id, e.target.checked);
+      }
+    });
+  }
 
-  document.getElementById('exportPngBtn').addEventListener('click', exportPngReport);
-  document.getElementById('exportPdfBtn').addEventListener('click', exportPdfReport);
-  document.getElementById('resetDataBtn').addEventListener('click', handleResetData);
+  if (dom.themeToggleBtn) {
+    dom.themeToggleBtn.addEventListener('click', () => {
+      appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
+      saveStateToLocal();
+      initTheme();
+    });
+  }
+
+  if (dom.exportPngBtn) dom.exportPngBtn.addEventListener('click', exportPngReport);
+  if (dom.exportPdfBtn) dom.exportPdfBtn.addEventListener('click', exportPdfReport);
+  if (dom.resetDataBtn) dom.resetDataBtn.addEventListener('click', handleResetData);
 }
 
+// 全局渲染中心
 function renderAll() {
   renderDashboard();
   renderWarningCard();
@@ -237,6 +312,7 @@ function renderAll() {
   renderSubjectList();
 }
 
+// 1. 渲染固定即時 Dashboard (108 課綱學分優先充填演算法)
 function renderDashboard() {
   let rawCompulsoryEarned = 0;
   let rawElectiveEarned = 0;
@@ -259,10 +335,10 @@ function renderDashboard() {
   const otherEarned = rawOtherEarned + overflowCompulsory + overflowElective;
   const totalEarned = rawCompulsoryEarned + rawElectiveEarned + rawOtherEarned;
 
-  document.getElementById('totalEarnedVal').textContent = totalEarned;
-  document.getElementById('reqEarnedVal').textContent = reqEarned;
-  document.getElementById('elecEarnedVal').textContent = elecEarned;
-  document.getElementById('otherEarnedVal').textContent = otherEarned;
+  if (dom.totalEarnedVal) dom.totalEarnedVal.textContent = totalEarned;
+  if (dom.reqEarnedVal) dom.reqEarnedVal.textContent = reqEarned;
+  if (dom.elecEarnedVal) dom.elecEarnedVal.textContent = elecEarned;
+  if (dom.otherEarnedVal) dom.otherEarnedVal.textContent = otherEarned;
 
   const REQ_GOAL = 102;
   const ELEC_GOAL = 40;
@@ -272,40 +348,38 @@ function renderDashboard() {
   const elecPct = Math.min(100, Math.round((elecEarned / ELEC_GOAL) * 100));
   const otherPct = Math.min(100, Math.round((otherEarned / 8) * 100));
 
-  document.getElementById('reqProgressFill').style.width = `${reqPct}%`;
-  document.getElementById('elecProgressFill').style.width = `${elecPct}%`;
-  document.getElementById('otherProgressFill').style.width = `${otherPct}%`;
+  if (dom.reqProgressFill) dom.reqProgressFill.style.width = `${reqPct}%`;
+  if (dom.elecProgressFill) dom.elecProgressFill.style.width = `${elecPct}%`;
+  if (dom.otherProgressFill) dom.otherProgressFill.style.width = `${otherPct}%`;
 
-  const shortageBadge = document.getElementById('dashShortageBadge');
-  const remaining = TOTAL_GOAL - totalEarned;
-
-  if (remaining <= 0 && reqEarned >= REQ_GOAL && elecEarned >= ELEC_GOAL) {
-    shortageBadge.textContent = '🎉 達標！可順利畢業！';
-    shortageBadge.className = 'badge-status achieved';
-  } else if (remaining <= 0) {
-    shortageBadge.textContent = '總學分達標，請留意必修需求';
-    shortageBadge.className = 'badge-status';
-  } else {
-    shortageBadge.textContent = `還差 ${remaining} 學分`;
-    shortageBadge.className = 'badge-status';
+  if (dom.dashShortageBadge) {
+    const remaining = TOTAL_GOAL - totalEarned;
+    if (remaining <= 0 && reqEarned >= REQ_GOAL && elecEarned >= ELEC_GOAL) {
+      dom.dashShortageBadge.textContent = '🎉 達標！可順利畢業！';
+      dom.dashShortageBadge.className = 'badge-status achieved';
+    } else if (remaining <= 0) {
+      dom.dashShortageBadge.textContent = '總學分達標，請留意必修需求';
+      dom.dashShortageBadge.className = 'badge-status';
+    } else {
+      dom.dashShortageBadge.textContent = `還差 ${remaining} 學分`;
+      dom.dashShortageBadge.className = 'badge-status';
+    }
   }
 }
 
+// 2. 適應性年級與歷史過關率趨勢預警演算法
 function renderWarningCard() {
+  if (!dom.warningCard) return;
+
   const currentSem = getAutoSemesterByDate(appState.currentGrade);
 
-  const card = document.getElementById('warningCard');
-  const pill = document.getElementById('warningLevelPill');
-  const summary = document.getElementById('warningCalcSummary');
-  const message = document.getElementById('warningMessage');
-  const details = document.getElementById('warningDetails');
-
+  // 高一新生剛入學 (高一上學期) ➔ 溫馨啟航指引！
   if (appState.currentGrade === 1 && currentSem === 1) {
-    card.className = 'warning-card state-fresh';
-    pill.textContent = '🌱 學習啟航';
-    summary.textContent = '課程地圖建置完畢';
-    message.textContent = '歡迎來到高中！本學期預計修習 31 學分，勾選通過科目即可掌握畢業進度！';
-    details.textContent = '目標指引：三年修滿 150 學分 (必修 102、選修 40)，一起加油！✨';
+    dom.warningCard.className = 'warning-card state-fresh';
+    if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🌱 學習啟航';
+    if (dom.warningCalcSummary) dom.warningCalcSummary.textContent = '課程地圖建置完畢';
+    if (dom.warningMessage) dom.warningMessage.textContent = '歡迎來到高中！本學期預計修習 31 學分，勾選通過科目即可掌握畢業進度！';
+    if (dom.warningDetails) dom.warningDetails.textContent = '目標指引：三年修滿 150 學分 (必修 102、選修 40)，一起加油！✨';
     return;
   }
 
@@ -337,23 +411,23 @@ function renderWarningCard() {
     }
   });
 
-  summary.textContent = `推估最高可得: ${futureMaxTotal} 學分`;
+  if (dom.warningCalcSummary) dom.warningCalcSummary.textContent = `推估最高可得: ${futureMaxTotal} 學分`;
 
   const isAlreadyGraduated = earnedTotal >= 150 && earnedRequired >= 102 && earnedElective >= 40;
   if (isAlreadyGraduated) {
-    card.className = 'warning-card state-safe';
-    pill.textContent = '🎓 達標恭喜';
-    message.textContent = '恭喜！您目前的修習學分已完全滿足 108 課綱畢業門檻！🎉';
-    details.textContent = '必修 ≥ 102、選修 ≥ 40，總學分 ≥ 150 皆全數解鎖成功！';
+    dom.warningCard.className = 'warning-card state-safe';
+    if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🎓 達標恭喜';
+    if (dom.warningMessage) dom.warningMessage.textContent = '恭喜！您目前的修習學分已完全滿足 108 課綱畢業門檻！🎉';
+    if (dom.warningDetails) dom.warningDetails.textContent = '必修 ≥ 102、選修 ≥ 40，總學分 ≥ 150 皆全數解鎖成功！';
     triggerConfetti();
     return;
   }
 
   if (futureMaxTotal < 150) {
-    card.className = 'warning-card state-danger';
-    pill.textContent = '🔴 嚴重學分缺口警示';
-    message.textContent = '⚠️ 警告：依目前學期進度，就算後續科目全過也無法達成 150 畢業門檻！';
-    details.textContent = `建議處置：目前推估最高僅能得 ${futureMaxTotal} 學分 (缺 ${150 - futureMaxTotal} 分)，請盡快洽詢教務處補修。`;
+    dom.warningCard.className = 'warning-card state-danger';
+    if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🔴 嚴重學分缺口警示';
+    if (dom.warningMessage) dom.warningMessage.textContent = '⚠️ 警告：依目前學期進度，就算後續科目全過也無法達成 150 畢業門檻！';
+    if (dom.warningDetails) dom.warningDetails.textContent = `建議處置：目前推估最高僅能得 ${futureMaxTotal} 學分 (缺 ${150 - futureMaxTotal} 分)，請盡快洽詢教務處補修。`;
     return;
   }
 
@@ -361,27 +435,27 @@ function renderWarningCard() {
   const passPct = Math.round(passRate * 100);
 
   if (passRate >= 0.90) {
-    card.className = 'warning-card state-safe';
-    pill.textContent = '🟢 學習趨勢優秀';
-    message.textContent = `表現非常理想！依過往 ${passPct}% 的高過關率推估，預計能輕鬆順利畢業！✨`;
-    details.textContent = `當前就讀高${getSemText(currentSem)}，目前已取得 ${earnedTotal} 學分 (目標 150)。`;
+    dom.warningCard.className = 'warning-card state-safe';
+    if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🟢 學習趨勢優秀';
+    if (dom.warningMessage) dom.warningMessage.textContent = `表現非常理想！依過往 ${passPct}% 的高過關率推估，預計能輕鬆順利畢業！✨`;
+    if (dom.warningDetails) dom.warningDetails.textContent = `當前就讀高${getSemText(currentSem)}，目前已取得 ${earnedTotal} 學分 (目標 150)。`;
   } else if (passRate >= 0.75) {
-    card.className = 'warning-card state-warning';
-    pill.textContent = '🟡 學習穩健提醒';
-    message.textContent = `學習狀態穩健 (過關率 ${passPct}%)，建議保持節奏並注意核心必修科目！`;
-    details.textContent = `目前已取得 ${earnedTotal} 學分，請持續關注各科修習狀況。`;
+    dom.warningCard.className = 'warning-card state-warning';
+    if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🟡 學習穩健提醒';
+    if (dom.warningMessage) dom.warningMessage.textContent = `學習狀態穩健 (過關率 ${passPct}%)，建議保持節奏並注意核心必修科目！`;
+    if (dom.warningDetails) dom.warningDetails.textContent = `目前已取得 ${earnedTotal} 學分，請持續關注各科修習狀況。`;
   } else {
-    card.className = 'warning-card state-warning';
-    pill.textContent = '🧡 趨勢警惕提醒';
-    message.textContent = `⚠️ 趨勢提醒：依前幾學期過關率 (${passPct}%) 推估，畢業學分稍緊繃！`;
-    details.textContent = '建議本學期把握每個必修與選修科目，避免學分缺口擴大。';
+    dom.warningCard.className = 'warning-card state-warning';
+    if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🧡 趨勢警惕提醒';
+    if (dom.warningMessage) dom.warningMessage.textContent = `⚠️ 趨勢提醒：依前幾學期過關率 (${passPct}%) 推估，畢業學分稍緊繃！`;
+    if (dom.warningDetails) dom.warningDetails.textContent = '建議本學期把握每個必修與選修科目，避免學分缺口擴大。';
   }
 }
 
+// 3. 渲染筆記本索引學期 Tabs
 function renderSemesterTabs() {
-  const container = document.getElementById('semesterNav');
-  if (!container) return;
-  const buttons = container.querySelectorAll('.notebook-tab');
+  if (!dom.semesterNav) return;
+  const buttons = dom.semesterNav.querySelectorAll('.notebook-tab');
 
   buttons.forEach(btn => {
     const sem = parseInt(btn.dataset.sem, 10);
@@ -398,22 +472,23 @@ function renderSemesterTabs() {
   });
 }
 
+// 4. 渲染特定學期科目列表
 function renderSubjectList() {
-  const currentSem = appState.activeSemTab;
-  const container = document.getElementById('subjectListContainer');
-  const semTitle = document.getElementById('currentSemTitle');
-  const semStats = document.getElementById('currentSemStats');
+  if (!dom.subjectListContainer) return;
 
-  semTitle.textContent = `${getSemText(currentSem)} 科目檢核`;
+  const currentSem = appState.activeSemTab;
+  if (dom.currentSemTitle) dom.currentSemTitle.textContent = `${getSemText(currentSem)} 科目檢核`;
 
   const subjects = sortSubjects(appState.subjects.filter(s => s.sem === currentSem));
   const totalCredits = subjects.reduce((sum, s) => sum + s.credits, 0);
   const passedCredits = subjects.filter(s => s.passed).reduce((sum, s) => sum + s.credits, 0);
 
-  semStats.textContent = `已取得 ${passedCredits}/${totalCredits} 學分 (${subjects.length}個科目)`;
+  if (dom.currentSemStats) {
+    dom.currentSemStats.textContent = `已取得 ${passedCredits}/${totalCredits} 學分 (${subjects.length}個科目)`;
+  }
 
   if (subjects.length === 0) {
-    container.innerHTML = `
+    dom.subjectListContainer.innerHTML = `
       <div style="text-align:center; padding: 40px 20px; color: var(--text-sub);">
         <p style="font-size:2rem; margin-bottom:8px;">📚</p>
         <p>此學期目前尚無科目設定。</p>
@@ -422,7 +497,7 @@ function renderSubjectList() {
     return;
   }
 
-  container.innerHTML = subjects.map(sub => `
+  dom.subjectListContainer.innerHTML = subjects.map(sub => `
     <div class="subject-item ${sub.passed ? 'passed' : 'failed'}" data-id="${sub.id}">
       <div class="sub-inline-row">
         <span class="sub-name">${escapeHtml(sub.name)}</span>
@@ -437,15 +512,9 @@ function renderSubjectList() {
       </div>
     </div>
   `).join('');
-
-  container.querySelectorAll('.sub-toggle-checkbox').forEach(chk => {
-    chk.addEventListener('change', (e) => {
-      const id = e.target.dataset.id;
-      toggleSubjectPassed(id, e.target.checked);
-    });
-  });
 }
 
+// 科目排序邏輯 (必修在前、主考科在前)
 function sortSubjects(subjects) {
   const catPriority = { 'required': 1, 'elective': 2, 'other': 3 };
   const academicKeywords = ['國', '英', '數', '史', '地', '公', '社', '物', '化', '生', '地科', '資', '專題', '探究', '電腦'];
@@ -463,6 +532,7 @@ function sortSubjects(subjects) {
   });
 }
 
+// 切換科目狀態
 function toggleSubjectPassed(id, passed) {
   const sub = appState.subjects.find(s => s.id === id);
   if (sub) {
@@ -472,6 +542,7 @@ function toggleSubjectPassed(id, passed) {
   }
 }
 
+// 重置資料
 function handleResetData() {
   if (confirm('⚠️ 警告：確定要重置所有勾選紀錄嗎？\n\n此操作將會清空您目前所有學分數據並恢復為初始預設值，此動作無法復原。')) {
     appState = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -481,6 +552,7 @@ function handleResetData() {
   }
 }
 
+// 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 HTML 生成
 function generateFullReportHtml() {
   const gradeText = { 1: '高一', 2: '高二', 3: '高三' }[appState.currentGrade] || '高二';
   const options = TRACK_OPTIONS_BY_GRADE[appState.currentGrade] || TRACK_OPTIONS_BY_GRADE[2];
@@ -579,9 +651,12 @@ function generateFullReportHtml() {
   `;
 }
 
+// 🖼️ 匯出 PNG 長圖
 async function exportPngReport() {
   try {
-    const wrapper = document.getElementById('exportReportWrapper');
+    const wrapper = dom.exportReportWrapper;
+    if (!wrapper) return;
+
     wrapper.innerHTML = generateFullReportHtml();
     wrapper.style.display = 'block';
 
@@ -595,6 +670,7 @@ async function exportPngReport() {
     });
 
     wrapper.style.display = 'none';
+    wrapper.innerHTML = ''; // 清除 DOM 記憶體
 
     const link = document.createElement('a');
     link.download = `畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.png`;
@@ -605,9 +681,12 @@ async function exportPngReport() {
   }
 }
 
+// 📄 匯出 PDF 報告書
 async function exportPdfReport() {
   try {
-    const wrapper = document.getElementById('exportReportWrapper');
+    const wrapper = dom.exportReportWrapper;
+    if (!wrapper) return;
+
     wrapper.innerHTML = generateFullReportHtml();
     wrapper.style.display = 'block';
 
@@ -621,6 +700,7 @@ async function exportPdfReport() {
     });
 
     wrapper.style.display = 'none';
+    wrapper.innerHTML = ''; // 清除 DOM 記憶體
 
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
