@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v20.0 還原極致美觀 PDF 版) */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v21.0 百分比結算版) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
@@ -453,6 +453,7 @@ function renderSemesterTabs() {
   });
 }
 
+// 4. 渲染特定學期科目列表 (含高質感百分比達成率計算與 100% 慶祝圖示)
 function renderSubjectList() {
   if (!dom.subjectListContainer) return;
 
@@ -463,8 +464,14 @@ function renderSubjectList() {
   const totalCredits = subjects.reduce((sum, s) => sum + s.credits, 0);
   const passedCredits = subjects.filter(s => s.passed).reduce((sum, s) => sum + s.credits, 0);
 
+  const pct = totalCredits > 0 ? Math.round((passedCredits / totalCredits) * 100) : 0;
+
   if (dom.currentSemStats) {
-    dom.currentSemStats.textContent = `已取得 ${passedCredits}/${totalCredits} 學分 (${subjects.length}個科目)`;
+    if (pct === 100 && totalCredits > 0) {
+      dom.currentSemStats.textContent = `🎉 已取得 100% (${passedCredits}/${totalCredits} 學分, ${subjects.length}個科目)`;
+    } else {
+      dom.currentSemStats.textContent = `已取得 ${pct}% (${passedCredits}/${totalCredits} 學分, ${subjects.length}個科目)`;
+    }
   }
 
   if (subjects.length === 0) {
@@ -627,7 +634,6 @@ function generateFullReportHtml() {
   `;
 }
 
-// 🖼️ 匯出 PNG 長圖
 async function exportPngReport() {
   try {
     const wrapper = dom.exportReportWrapper;
@@ -657,7 +663,6 @@ async function exportPngReport() {
   }
 }
 
-// 📄 匯出全 6 學期精美 A4 PDF 報告書 (還原 v18.0 極致美觀 200% 超高解析度繪製)
 async function exportPdfReport() {
   try {
     const wrapper = dom.exportReportWrapper;
