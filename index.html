@@ -15,7 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=3.0">
+  <link rel="stylesheet" href="style.css?v=4.0">
 </head>
 <body>
   <div class="app-container">
@@ -67,20 +67,23 @@
     <!-- Fixed Real-Time Credit Dashboard (Sticky) -->
     <section class="sticky-dashboard">
       <div class="dashboard-main-ring">
-        <div class="ring-content">
-          <div class="ring-number" id="totalEarnedVal">0</div>
-          <div class="ring-label">/ 150 總學分</div>
+        <div class="ring-left">
+          <div class="diploma-icon-box">🎓</div>
+          <div class="ring-content">
+            <div class="ring-number" id="totalEarnedVal">0</div>
+            <div class="ring-label">/ 150 畢業總學分</div>
+          </div>
         </div>
         <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
       </div>
 
-      <!-- 3 Key Credit Category Bars -->
+      <!-- 3 Key Credit Category Bars (Academic School Themed) -->
       <div class="category-bars-grid">
-        <!-- 1. Required -->
+        <!-- 1. Required (Textbooks) -->
         <div class="cat-card required-card">
           <div class="cat-header">
-            <span class="cat-dot"></span>
-            <span class="cat-title">部定必修</span>
+            <span class="cat-icon">📚</span>
+            <span class="cat-title">部定必修 (國英數社自體)</span>
             <span class="cat-count"><strong id="reqEarnedVal">0</strong> / 102</span>
           </div>
           <div class="progress-track">
@@ -88,11 +91,11 @@
           </div>
         </div>
 
-        <!-- 2. Elective -->
+        <!-- 2. Elective (Exploration Beaker) -->
         <div class="cat-card elective-card">
           <div class="cat-header">
-            <span class="cat-dot"></span>
-            <span class="cat-title">選修學分</span>
+            <span class="cat-icon">🧪</span>
+            <span class="cat-title">加深加廣與多元選修</span>
             <span class="cat-count"><strong id="elecEarnedVal">0</strong> / 40</span>
           </div>
           <div class="progress-track">
@@ -100,11 +103,11 @@
           </div>
         </div>
 
-        <!-- 3. Other & School Required -->
+        <!-- 3. Other & School Required (Campus Life) -->
         <div class="cat-card other-card">
           <div class="cat-header">
-            <span class="cat-dot"></span>
-            <span class="cat-title">校訂與其他</span>
+            <span class="cat-icon">🏫</span>
+            <span class="cat-title">校訂必修與團體活動</span>
             <span class="cat-count"><strong id="otherEarnedVal">0</strong> 學分</span>
           </div>
           <div class="progress-track">
