@@ -147,26 +147,34 @@ html, body {
   transform: scale(0.9);
 }
 
-/* Student Status Selector Bar */
+/* Student Status & Track Selector Bar */
 .student-status-bar {
   padding: 10px 20px;
   background: var(--card-bg);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
   border-bottom: 1px solid var(--border-color);
 }
 
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .status-label {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 6px;
   color: var(--text-main);
+  white-space: nowrap;
 }
 
-.grade-select {
+.grade-select, .track-select {
   padding: 6px 12px;
   border-radius: 12px;
   border: 2px solid var(--primary-light);
@@ -174,9 +182,16 @@ html, body {
   color: var(--primary);
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   outline: none;
   cursor: pointer;
+  max-width: 60%;
+  text-overflow: ellipsis;
+}
+
+.track-select {
+  border-color: #74b9ff;
+  color: #0984e3;
 }
 
 /* Sticky Real-Time Dashboard */
