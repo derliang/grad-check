@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 聖功女中 113 學年度畢業學分檢核 App - 核心樣式表 (v29.0 頁首整體固定置頂版) */
+/* 畢業啦～ 🎓 聖功女中 113 學年度畢業學分檢核 App - 核心樣式表 (v30.0 堅固置頂修復版) */
 
 :root {
   /* Color Palette - Light Macaron Theme */
@@ -68,7 +68,7 @@ html, body {
   line-height: 1.5;
 }
 
-/* Outer Container */
+/* Outer Container - 移除 overflow-x: hidden 以確保 position: sticky 100% 正常置頂 */
 .app-container {
   width: 100%;
   max-width: 480px;
@@ -79,17 +79,17 @@ html, body {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow-x: hidden;
   padding-bottom: 74px;
 }
 
-/* 📌 頁首整體固定置頂面板 (Unified Sticky Top Header Group) */
+/* 📌 頁首整體固定置頂面板 (Unified Sticky Top Header Group, Z-Index 500) */
 .sticky-top-header-group {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 200;
+  z-index: 500;
   background: var(--card-bg);
-  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(12px);
 }
