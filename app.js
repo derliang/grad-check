@@ -1,11 +1,11 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (效能與正確性優化版) */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v19.0) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
 
-// 預設 108 課綱範本數據 (高一31+31=62, 高二30+30=60, 高三30+30=60, 六學期總計182學分)
+// 預設 108 課綱範本數據 (預設就讀年級為 高一)
 const DEFAULT_DATA = {
-  currentGrade: 2, // 高一:1, 高二:2, 高三:3
+  currentGrade: 1, // 預設年級：高一
   track: 'exp_math_science', // 預設組別：數理實驗班
   theme: 'light',
   subjects: [
@@ -22,7 +22,7 @@ const DEFAULT_DATA = {
     { id: 's1_10', sem: 1, name: '資訊科技', credits: 1, cat: 'required', passed: true },
     { id: 's1_11', sem: 1, name: '音樂', credits: 1, cat: 'required', passed: true },
     { id: 's1_12', sem: 1, name: '體育 I', credits: 2, cat: 'required', passed: true },
-    { id: 's1_13', sem: 1, name: '國際校本-本土篇', credits: 1, cat: 'required', passed: true }, // 校訂必修歸類為必修
+    { id: 's1_13', sem: 1, name: '國際校本-本土篇', credits: 1, cat: 'required', passed: true },
     { id: 's1_14', sem: 1, name: '多元選修 I', credits: 2, cat: 'elective', passed: true },
 
     // === 高一下 (Sem 2) - 31 學分 ===
@@ -41,28 +41,28 @@ const DEFAULT_DATA = {
     { id: 's2_13', sem: 2, name: '多元選修 II', credits: 2, cat: 'elective', passed: true },
 
     // === 高二上 (Sem 3) - 30 學分 ===
-    { id: 's3_1', sem: 3, name: '國語文 III', credits: 4, cat: 'required', passed: true },
-    { id: 's3_2', sem: 3, name: '英語文 III', credits: 4, cat: 'required', passed: true },
-    { id: 's3_3', sem: 3, name: '數學 A III', credits: 4, cat: 'required', passed: true },
-    { id: 's3_4', sem: 3, name: '探究與實作：自然科學領域專題', credits: 2, cat: 'elective', passed: true },
-    { id: 's3_5', sem: 3, name: '選修物理 I', credits: 3, cat: 'elective', passed: true },
-    { id: 's3_6', sem: 3, name: '選修化學 I', credits: 3, cat: 'elective', passed: true },
-    { id: 's3_7', sem: 3, name: '加深加廣選修 I', credits: 4, cat: 'elective', passed: true },
-    { id: 's3_8', sem: 3, name: '生命教育', credits: 1, cat: 'required', passed: true },
-    { id: 's3_9', sem: 3, name: '校訂特色專題 I', credits: 3, cat: 'other', passed: true },
-    { id: 's3_10', sem: 3, name: '體育 III', credits: 2, cat: 'required', passed: true },
+    { id: 's3_1', sem: 3, name: '國語文 III', credits: 4, cat: 'required', passed: false },
+    { id: 's3_2', sem: 3, name: '英語文 III', credits: 4, cat: 'required', passed: false },
+    { id: 's3_3', sem: 3, name: '數學 A III', credits: 4, cat: 'required', passed: false },
+    { id: 's3_4', sem: 3, name: '探究與實作：自然科學領域專題', credits: 2, cat: 'elective', passed: false },
+    { id: 's3_5', sem: 3, name: '選修物理 I', credits: 3, cat: 'elective', passed: false },
+    { id: 's3_6', sem: 3, name: '選修化學 I', credits: 3, cat: 'elective', passed: false },
+    { id: 's3_7', sem: 3, name: '加深加廣選修 I', credits: 4, cat: 'elective', passed: false },
+    { id: 's3_8', sem: 3, name: '生命教育', credits: 1, cat: 'required', passed: false },
+    { id: 's3_9', sem: 3, name: '校訂特色專題 I', credits: 3, cat: 'other', passed: false },
+    { id: 's3_10', sem: 3, name: '體育 III', credits: 2, cat: 'required', passed: false },
 
     // === 高二下 (Sem 4) - 30 學分 ===
-    { id: 's4_1', sem: 4, name: '國語文 IV', credits: 4, cat: 'required', passed: true },
-    { id: 's4_2', sem: 4, name: '英語文 IV', credits: 4, cat: 'required', passed: true },
-    { id: 's4_3', sem: 4, name: '數學 A IV', credits: 4, cat: 'required', passed: true },
+    { id: 's4_1', sem: 4, name: '國語文 IV', credits: 4, cat: 'required', passed: false },
+    { id: 's4_2', sem: 4, name: '英語文 IV', credits: 4, cat: 'required', passed: false },
+    { id: 's4_3', sem: 4, name: '數學 A IV', credits: 4, cat: 'required', passed: false },
     { id: 's4_4', sem: 4, name: '探究與實作：社會領域專題', credits: 2, cat: 'elective', passed: false },
     { id: 's4_5', sem: 4, name: '選修生物 II', credits: 3, cat: 'elective', passed: false },
     { id: 's4_6', sem: 4, name: '選修地科 II', credits: 3, cat: 'elective', passed: false },
     { id: 's4_7', sem: 4, name: '加深加廣選修 II', credits: 4, cat: 'elective', passed: false },
-    { id: 's4_8', sem: 4, name: '靈智教育-自我探索', credits: 1, cat: 'required', passed: true },
+    { id: 's4_8', sem: 4, name: '靈智教育-自我探索', credits: 1, cat: 'required', passed: false },
     { id: 's4_9', sem: 4, name: '校訂特色專題 II', credits: 3, cat: 'other', passed: false },
-    { id: 's4_10', sem: 4, name: '體育 IV', credits: 2, cat: 'required', passed: true },
+    { id: 's4_10', sem: 4, name: '體育 IV', credits: 2, cat: 'required', passed: false },
 
     // === 高三上 (Sem 5) - 30 學分 ===
     { id: 's5_1', sem: 5, name: '國語文選修 V', credits: 4, cat: 'elective', passed: false },
@@ -106,19 +106,16 @@ const TRACK_OPTIONS_BY_GRADE = {
   ]
 };
 
-// 狀態管理 State
 let appState = {
-  currentGrade: 2,
-  activeSemTab: 3,
+  currentGrade: 1, // 預設高一
+  activeSemTab: 1, // 預設高一上
   track: 'exp_math_science',
   theme: 'light',
   subjects: []
 };
 
-// DOM 快取 (DOM Cache for Performance)
 const dom = {};
 
-// 教育部官方學期日期判定 (8/1~1/31 第一學期, 2/1~7/31 第二學期)
 function getAutoSemesterByDate(gradeNum) {
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -127,16 +124,15 @@ function getAutoSemesterByDate(gradeNum) {
   if (gradeNum === 1) return isFirstSemester ? 1 : 2;
   if (gradeNum === 2) return isFirstSemester ? 3 : 4;
   if (gradeNum === 3) return isFirstSemester ? 5 : 6;
-  return isFirstSemester ? 3 : 4;
+  return isFirstSemester ? 1 : 2;
 }
 
-// 頁面初始化入口
 document.addEventListener('DOMContentLoaded', () => {
   cacheDomElements();
   loadStateFromLocal();
   
   if (!appState.activeSemTab) {
-    appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 2);
+    appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 1);
   }
 
   renderTrackOptions();
@@ -145,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
 });
 
-// 快取常用 DOM 節點
 function cacheDomElements() {
   dom.totalEarnedVal = document.getElementById('totalEarnedVal');
   dom.reqEarnedVal = document.getElementById('reqEarnedVal');
@@ -178,7 +173,6 @@ function cacheDomElements() {
   dom.exportReportWrapper = document.getElementById('exportReportWrapper');
 }
 
-// 載入 LocalStorage (具備欄位完整性驗證)
 function loadStateFromLocal() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
@@ -186,11 +180,9 @@ function loadStateFromLocal() {
       const parsed = JSON.parse(saved);
       appState = { ...DEFAULT_DATA, ...parsed };
       
-      // 驗證 subjects 陣列合法性
       if (!Array.isArray(appState.subjects) || appState.subjects.length === 0) {
         appState.subjects = JSON.parse(JSON.stringify(DEFAULT_DATA.subjects));
       } else {
-        // 修復可能缺失欄位的舊資料
         appState.subjects.forEach(sub => {
           if (typeof sub.passed !== 'boolean') sub.passed = false;
           if (typeof sub.credits !== 'number') sub.credits = 2;
@@ -207,7 +199,6 @@ function loadStateFromLocal() {
   }
 }
 
-// 儲存至 LocalStorage
 function saveStateToLocal() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
@@ -216,7 +207,6 @@ function saveStateToLocal() {
   }
 }
 
-// 初始化主題
 function initTheme() {
   if (appState.theme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -227,12 +217,11 @@ function initTheme() {
   }
 }
 
-// 動態依年級渲染班別選單
 function renderTrackOptions() {
   if (!dom.trackSelect) return;
 
-  const currentGrade = appState.currentGrade || 2;
-  const options = TRACK_OPTIONS_BY_GRADE[currentGrade] || TRACK_OPTIONS_BY_GRADE[2];
+  const currentGrade = appState.currentGrade || 1;
+  const options = TRACK_OPTIONS_BY_GRADE[currentGrade] || TRACK_OPTIONS_BY_GRADE[1];
 
   dom.trackSelect.innerHTML = options.map(opt => `
     <option value="${opt.value}">${opt.label}</option>
@@ -245,10 +234,9 @@ function renderTrackOptions() {
   dom.trackSelect.value = appState.track;
 }
 
-// 綁定全域事件 (事件委派 Event Delegation 最佳化，避免重複監聽記憶體洩漏)
 function bindEvents() {
   if (dom.currentGradeSelect) {
-    dom.currentGradeSelect.value = appState.currentGrade || 2;
+    dom.currentGradeSelect.value = appState.currentGrade || 1;
     dom.currentGradeSelect.addEventListener('change', (e) => {
       appState.currentGrade = parseInt(e.target.value, 10);
       appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade);
@@ -266,7 +254,6 @@ function bindEvents() {
     });
   }
 
-  // 事件委派：學期 Tab 切換
   if (dom.semesterNav) {
     dom.semesterNav.addEventListener('click', (e) => {
       const btn = e.target.closest('.notebook-tab');
@@ -281,7 +268,6 @@ function bindEvents() {
     });
   }
 
-  // 事件委派：科目勾選切換 (Single Delegation)
   if (dom.subjectListContainer) {
     dom.subjectListContainer.addEventListener('change', (e) => {
       if (e.target.classList.contains('sub-toggle-checkbox')) {
@@ -304,7 +290,6 @@ function bindEvents() {
   if (dom.resetDataBtn) dom.resetDataBtn.addEventListener('click', handleResetData);
 }
 
-// 全局渲染中心
 function renderAll() {
   renderDashboard();
   renderWarningCard();
@@ -312,7 +297,6 @@ function renderAll() {
   renderSubjectList();
 }
 
-// 1. 渲染固定即時 Dashboard (108 課綱學分優先充填演算法)
 function renderDashboard() {
   let rawCompulsoryEarned = 0;
   let rawElectiveEarned = 0;
@@ -367,13 +351,11 @@ function renderDashboard() {
   }
 }
 
-// 2. 適應性年級與歷史過關率趨勢預警演算法
 function renderWarningCard() {
   if (!dom.warningCard) return;
 
   const currentSem = getAutoSemesterByDate(appState.currentGrade);
 
-  // 高一新生剛入學 (高一上學期) ➔ 溫馨啟航指引！
   if (appState.currentGrade === 1 && currentSem === 1) {
     dom.warningCard.className = 'warning-card state-fresh';
     if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🌱 學習啟航';
@@ -452,7 +434,6 @@ function renderWarningCard() {
   }
 }
 
-// 3. 渲染筆記本索引學期 Tabs
 function renderSemesterTabs() {
   if (!dom.semesterNav) return;
   const buttons = dom.semesterNav.querySelectorAll('.notebook-tab');
@@ -472,7 +453,6 @@ function renderSemesterTabs() {
   });
 }
 
-// 4. 渲染特定學期科目列表
 function renderSubjectList() {
   if (!dom.subjectListContainer) return;
 
@@ -514,7 +494,6 @@ function renderSubjectList() {
   `).join('');
 }
 
-// 科目排序邏輯 (必修在前、主考科在前)
 function sortSubjects(subjects) {
   const catPriority = { 'required': 1, 'elective': 2, 'other': 3 };
   const academicKeywords = ['國', '英', '數', '史', '地', '公', '社', '物', '化', '生', '地科', '資', '專題', '探究', '電腦'];
@@ -532,7 +511,6 @@ function sortSubjects(subjects) {
   });
 }
 
-// 切換科目狀態
 function toggleSubjectPassed(id, passed) {
   const sub = appState.subjects.find(s => s.id === id);
   if (sub) {
@@ -542,7 +520,6 @@ function toggleSubjectPassed(id, passed) {
   }
 }
 
-// 重置資料
 function handleResetData() {
   if (confirm('⚠️ 警告：確定要重置所有勾選紀錄嗎？\n\n此操作將會清空您目前所有學分數據並恢復為初始預設值，此動作無法復原。')) {
     appState = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -552,10 +529,9 @@ function handleResetData() {
   }
 }
 
-// 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 HTML 生成
 function generateFullReportHtml() {
-  const gradeText = { 1: '高一', 2: '高二', 3: '高三' }[appState.currentGrade] || '高二';
-  const options = TRACK_OPTIONS_BY_GRADE[appState.currentGrade] || TRACK_OPTIONS_BY_GRADE[2];
+  const gradeText = { 1: '高一', 2: '高二', 3: '高三' }[appState.currentGrade] || '高一';
+  const options = TRACK_OPTIONS_BY_GRADE[appState.currentGrade] || TRACK_OPTIONS_BY_GRADE[1];
   const trackObj = options.find(o => o.value === appState.track);
   const trackText = trackObj ? trackObj.label : '數理實驗班';
   const todayStr = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -670,7 +646,7 @@ async function exportPngReport() {
     });
 
     wrapper.style.display = 'none';
-    wrapper.innerHTML = ''; // 清除 DOM 記憶體
+    wrapper.innerHTML = '';
 
     const link = document.createElement('a');
     link.download = `畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.png`;
@@ -681,7 +657,7 @@ async function exportPngReport() {
   }
 }
 
-// 📄 匯出 PDF 報告書
+// 📄 匯出原生矢量文字型 PDF 報告書 (使用 html2pdf 重構引擎，支援可選取複製文字與智慧分頁避切割)
 async function exportPdfReport() {
   try {
     const wrapper = dom.exportReportWrapper;
@@ -690,38 +666,55 @@ async function exportPdfReport() {
     wrapper.innerHTML = generateFullReportHtml();
     wrapper.style.display = 'block';
 
-    const target = wrapper.querySelector('.export-report-document');
+    const element = wrapper.querySelector('.export-report-document');
 
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    });
+    if (typeof html2pdf === 'function') {
+      const opt = {
+        margin: [6, 6, 6, 6],
+        filename: `畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
 
-    wrapper.style.display = 'none';
-    wrapper.innerHTML = ''; // 清除 DOM 記憶體
+      await html2pdf().set(opt).from(element).save();
 
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-    const pageHeight = 297;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
+      wrapper.style.display = 'none';
+      wrapper.innerHTML = '';
+    } else {
+      // Fallback
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+      wrapper.style.display = 'none';
+      wrapper.innerHTML = '';
 
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-    }
 
-    pdf.save(`畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`);
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`);
+    }
   } catch (err) {
     alert('PDF 報告書匯出失敗：' + err.message);
   }

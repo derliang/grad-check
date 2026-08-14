@@ -83,66 +83,79 @@ html, body {
   padding-bottom: 74px;
 }
 
-/* Header - 凸顯圖示與標題 */
+/* Header - 單行完美對齊，徹底消除折行 Bug */
 .app-header {
-  padding: 14px 16px;
+  padding: 10px 12px;
   background: var(--card-bg);
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
+  gap: 4px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .brand-icon {
-  font-size: 2.2rem; /* 顯著放大學士帽圖示 */
+  font-size: 1.8rem;
   line-height: 1;
-  filter: drop-shadow(0 2px 8px rgba(108, 92, 231, 0.3));
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(108, 92, 231, 0.25));
+}
+
+.brand-text {
+  min-width: 0;
 }
 
 .app-title {
-  font-size: 1.45rem; /* 大幅凸顯主標題 */
+  font-size: 1.25rem;
   font-weight: 900;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .app-subtitle {
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--text-sub);
   display: block;
   margin-top: 1px;
+  white-space: nowrap; /* 100% 絕不換行 */
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-/* Cute Pill Buttons for PDF & PNG Downloads */
+/* Cute Pill Buttons - 強制單行不截斷 */
 .cute-pill-btn {
-  padding: 6px 10px;
-  border-radius: 14px;
+  padding: 5px 8px;
+  border-radius: 12px;
   border: none;
   font-family: inherit;
   font-weight: 800;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   cursor: pointer;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  white-space: nowrap; /* 100% 絕不換行 */
+  flex-shrink: 0;
 }
 
 .cute-pill-btn.btn-png {
@@ -163,25 +176,27 @@ html, body {
 .icon-btn {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  font-size: 1rem;
+  font-size: 0.92rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: transform 0.15s ease;
+  flex-shrink: 0;
 }
 
 /* 誇張醒目的炸彈按鈕 💣 */
 .icon-btn.btn-bomb {
-  font-size: 1.35rem; /* 大幅放大炸彈 */
-  width: 38px;
-  height: 38px;
+  font-size: 1.25rem;
+  width: 34px;
+  height: 34px;
   background: #fff0f3;
   border: 2px solid #ff4757;
-  box-shadow: 0 4px 10px rgba(255, 71, 87, 0.25);
+  box-shadow: 0 3px 8px rgba(255, 71, 87, 0.25);
+  flex-shrink: 0;
 }
 
 .icon-btn.btn-bomb:active {
@@ -745,11 +760,11 @@ input:checked + .slider:before {
   color: #ff7675;
 }
 
-/* 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 Print Document Styles */
+/* 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 Print Document Styles (含分頁防切割規則) */
 .export-report-document {
-  width: 820px;
+  width: 800px;
   background: #ffffff;
-  padding: 32px;
+  padding: 30px;
   font-family: var(--font-family);
   color: #2d3436;
   box-sizing: border-box;
@@ -759,6 +774,7 @@ input:checked + .slider:before {
   border-bottom: 3px solid #6c5ce7;
   padding-bottom: 14px;
   margin-bottom: 18px;
+  page-break-inside: avoid;
 }
 
 .rpt-main-title {
@@ -787,6 +803,7 @@ input:checked + .slider:before {
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 18px;
+  page-break-inside: avoid;
 }
 
 .rpt-dash-card {
@@ -824,6 +841,7 @@ input:checked + .slider:before {
   margin-bottom: 20px;
   font-size: 0.85rem;
   font-weight: 700;
+  page-break-inside: avoid;
 }
 
 .rpt-warning-card.state-danger {
@@ -848,12 +866,15 @@ input:checked + .slider:before {
   margin-bottom: 20px;
 }
 
+/* 分頁防切割關鍵規則 (Page-Break Avoidance) */
 .sem-matrix-box {
   border: 1px solid #eef2f7;
   border-radius: 10px;
   padding: 12px;
   background: #ffffff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .sem-matrix-title {
@@ -898,4 +919,5 @@ input:checked + .slider:before {
   font-weight: 700;
   color: #d63031;
   line-height: 1.4;
+  page-break-inside: avoid;
 }
