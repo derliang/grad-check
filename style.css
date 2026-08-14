@@ -688,6 +688,42 @@ input:checked + .slider:before {
   margin-bottom: 10px;
 }
 
+/* 醒目頁尾警語卡片 */
+.footer-alert-box {
+  background: #fff8e7;
+  border: 2px dashed #ffa502;
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(255, 165, 2, 0.12);
+}
+
+[data-theme="dark"] .footer-alert-box {
+  background: #3c321e;
+  border-color: #e1b12c;
+}
+
+.footer-alert-box .alert-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.footer-alert-box .alert-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #d63031;
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .footer-alert-box .alert-text {
+  color: #ff7675;
+}
+
 .footer-links {
   display: flex;
   justify-content: center;
