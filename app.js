@@ -1,96 +1,127 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v24.0 防呆鎖定與分區版) */
+/* 畢業啦～ 🎓 私立聖功女中 113 學年度畢業學分檢核 App - 核心邏輯 (v25.0) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
 
-// 預設 108 課綱範本數據 (預設就讀年級為 高一)
-const DEFAULT_DATA = {
-  currentGrade: 1, // 預設年級：高一
-  track: 'exp_math_science', // 預設組別：數理實驗班
-  theme: 'light',
-  subjects: [
-    // === 高一上 (Sem 1) - 31 學分 ===
-    { id: 's1_1', sem: 1, name: '國語文 I', credits: 4, cat: 'required', group: 'common', passed: true },
-    { id: 's1_2', sem: 1, name: '英語文 I', credits: 4, cat: 'required', group: 'common', passed: true },
-    { id: 's1_3', sem: 1, name: '數學 I', credits: 4, cat: 'required', group: 'common', passed: true },
-    { id: 's1_4', sem: 1, name: '歷史 I', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_5', sem: 1, name: '地理 I', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_6', sem: 1, name: '公民與社會 I', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_7', sem: 1, name: '基礎物理', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_8', sem: 1, name: '基礎化學', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_9', sem: 1, name: '基礎生物', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_10', sem: 1, name: '資訊科技', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's1_11', sem: 1, name: '音樂', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's1_12', sem: 1, name: '體育 I', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's1_13', sem: 1, name: '國際校本-本土篇', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's1_14', sem: 1, name: '多元選修 I', credits: 2, cat: 'elective', group: 'common', passed: true },
+// 臺南市私立聖功女中 113 學年度官方標準課程地圖
+const ST_CATHERINE_113_DATABASE = {
+  school: "臺南市私立聖功女中",
+  cohortYear: 113,
+  trackDefinitions: {
+    general_g1: "🏫 高一普通班",
+    general_humanities: "📚 普通班人文班群",
+    general_science: "🔬 普通班數理班群",
+    exp_bilingual: "✨ 雙語實驗班",
+    exp_math_science: "🚀 數理實驗班"
+  },
+  courses: [
+    // === 高一上 (Sem 1) ===
+    { sem: 1, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "數學", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "歷史", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "地理", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "公民與社會", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "基礎物理", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "基礎化學", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "基礎生物", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "資訊科技", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "音樂", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "國際校本-本土篇", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 1, name: "多元選修", credits: 1, cat: "elective", group: "track", tracks: ["general_humanities", "general_science", "exp_bilingual"], mutuallyExclusive: false },
+    { sem: 1, name: "補強-數學", credits: 1, cat: "elective", group: "track", tracks: ["general_humanities", "general_science", "exp_bilingual"], mutuallyExclusive: false },
+    { sem: 1, name: "數學與模型", credits: 2, cat: "elective", group: "track", tracks: ["exp_math_science"], mutuallyExclusive: false },
 
-    // === 高一下 (Sem 2) - 31 學分 ===
-    { id: 's2_1', sem: 2, name: '國語文 II', credits: 4, cat: 'required', group: 'common', passed: true },
-    { id: 's2_2', sem: 2, name: '英語文 II', credits: 4, cat: 'required', group: 'common', passed: true },
-    { id: 's2_3', sem: 2, name: '數學 II', credits: 4, cat: 'required', group: 'common', passed: true },
-    { id: 's2_4', sem: 2, name: '歷史 II', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's2_5', sem: 2, name: '地理 II', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's2_6', sem: 2, name: '公民與社會 II', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's2_7', sem: 2, name: '地球科學', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's2_8', sem: 2, name: '生活科技', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's2_9', sem: 2, name: '家政', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's2_10', sem: 2, name: '體育 II', credits: 2, cat: 'required', group: 'common', passed: true },
-    { id: 's2_11', sem: 2, name: '國際校本-國際篇', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's2_12', sem: 2, name: '靈智教育-服務與思辨', credits: 1, cat: 'required', group: 'common', passed: true },
-    { id: 's2_13', sem: 2, name: '多元選修 II', credits: 2, cat: 'elective', group: 'common', passed: true },
+    // === 高一下 (Sem 2) ===
+    { sem: 2, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "數學", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "歷史", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "地理", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "公民與社會", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "地球科學", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "生活科技", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "家政", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "國際校本-國際篇", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "靈智教育-服務與思辨", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 2, name: "多元選修 II", credits: 2, cat: "elective", group: "common", tracks: ["all"], mutuallyExclusive: false },
 
-    // === 高二上 (Sem 3) - 30 學分 (區分共同與分流) ===
-    { id: 's3_1', sem: 3, name: '國語文 III', credits: 4, cat: 'required', group: 'common', passed: false },
-    { id: 's3_2', sem: 3, name: '英語文 III', credits: 4, cat: 'required', group: 'common', passed: false },
-    { id: 's3_8', sem: 3, name: '生命教育', credits: 1, cat: 'required', group: 'common', passed: false },
-    { id: 's3_10', sem: 3, name: '體育 III', credits: 2, cat: 'required', group: 'common', passed: false },
+    // === 高二上 (Sem 3) ===
+    { sem: 3, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "生命教育", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
     
-    // 高二上分流科目
-    { id: 's3_3', sem: 3, name: '數學 A / 數學 B', credits: 4, cat: 'required', group: 'track', passed: false },
-    { id: 's3_4', sem: 3, name: '探究與實作：自然 (社會)', credits: 2, cat: 'elective', group: 'track', passed: false },
-    { id: 's3_5', sem: 3, name: '選修物理 / 歷史 I', credits: 3, cat: 'elective', group: 'track', passed: false },
-    { id: 's3_6', sem: 3, name: '選修化學 / 地理 I', credits: 3, cat: 'elective', group: 'track', passed: false },
-    { id: 's3_7', sem: 3, name: '加深加廣選修 I', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's3_9', sem: 3, name: '校訂特色專題 I', credits: 3, cat: 'other', group: 'track', passed: false },
+    { sem: 3, name: "數學B", credits: 4, cat: "required", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
+    { sem: 3, name: "數學A", credits: 4, cat: "required", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
+    { sem: 3, name: "物理Cafe", credits: 1, cat: "elective", group: "track", tracks: ["exp_math_science"], mutuallyExclusive: false },
+    { sem: 3, name: "市場行銷與設計", credits: 1, cat: "elective", group: "track", tracks: ["exp_bilingual"], mutuallyExclusive: false },
+    { sem: 3, name: "探究與實作：自然 (社會)", credits: 2, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "選修物理 / 歷史", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "選修化學 / 地理", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "加深加廣選修", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 3, name: "校訂特色專題", credits: 3, cat: "other", group: "track", tracks: ["all"], mutuallyExclusive: false },
 
-    // === 高二下 (Sem 4) - 30 學分 (區分共同與分流) ===
-    { id: 's4_1', sem: 4, name: '國語文 IV', credits: 4, cat: 'required', group: 'common', passed: false },
-    { id: 's4_2', sem: 4, name: '英語文 IV', credits: 4, cat: 'required', group: 'common', passed: false },
-    { id: 's4_8', sem: 4, name: '靈智教育-自我探索', credits: 1, cat: 'required', group: 'common', passed: false },
-    { id: 's4_10', sem: 4, name: '體育 IV', credits: 2, cat: 'required', group: 'common', passed: false },
+    // === 高二下 (Sem 4) ===
+    { sem: 4, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "靈智教育-自我探索", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
     
-    // 高二下分流科目
-    { id: 's4_3', sem: 4, name: '數學 A / 數學 B IV', credits: 4, cat: 'required', group: 'track', passed: false },
-    { id: 's4_4', sem: 4, name: '探究與實作：自然 (社會) II', credits: 2, cat: 'elective', group: 'track', passed: false },
-    { id: 's4_5', sem: 4, name: '選修生物 / 公民 II', credits: 3, cat: 'elective', group: 'track', passed: false },
-    { id: 's4_6', sem: 4, name: '選修地科 / 社會 II', credits: 3, cat: 'elective', group: 'track', passed: false },
-    { id: 's4_7', sem: 4, name: '加深加廣選修 II', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's4_9', sem: 4, name: '校訂特色專題 II', credits: 3, cat: 'other', group: 'track', passed: false },
+    { sem: 4, name: "數學B", credits: 4, cat: "required", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
+    { sem: 4, name: "數學A", credits: 4, cat: "required", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
+    { sem: 4, name: "探究與實作：自然 (社會) II", credits: 2, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "選修生物 / 公民 II", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "選修地科 / 社會 II", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "加深加廣選修 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 4, name: "校訂特色專題 II", credits: 3, cat: "other", group: "track", tracks: ["all"], mutuallyExclusive: false },
 
-    // === 高三上 (Sem 5) - 30 學分 (區分共同與分流) ===
-    { id: 's5_8', sem: 5, name: '體育 V', credits: 2, cat: 'required', group: 'common', passed: false },
-    { id: 's5_7', sem: 5, name: '團體活動與自主學習', credits: 4, cat: 'other', group: 'common', passed: false },
+    // === 高三上 (Sem 5) ===
+    { sem: 5, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 5, name: "團體活動與自主學習", credits: 4, cat: "other", group: "common", tracks: ["all"], mutuallyExclusive: false },
     
-    // 高三上分流科目
-    { id: 's5_1', sem: 5, name: '國語文選修 V', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's5_2', sem: 5, name: '英語文選修 V', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's5_3', sem: 5, name: '數學甲 / 數學乙 I', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's5_4', sem: 5, name: '電腦 (生物)', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's5_5', sem: 5, name: '工程專題 (生醫專題)', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's5_6', sem: 5, name: '加深加廣專門科目 I', credits: 4, cat: 'elective', group: 'track', passed: false },
+    { sem: 5, name: "數學乙", credits: 4, cat: "elective", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
+    { sem: 5, name: "數學甲", credits: 4, cat: "elective", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
+    { sem: 5, name: "國語文選修", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 5, name: "英語文選修", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 5, name: "電腦 (生物)", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: true },
+    { sem: 5, name: "加深加廣專門科目", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
 
-    // === 高三下 (Sem 6) - 30 學分 (區分共同與分流) ===
-    { id: 's6_7', sem: 6, name: '體育 VI', credits: 2, cat: 'required', group: 'common', passed: false },
-    { id: 's6_6', sem: 6, name: '自主學習畢業成果專題', credits: 6, cat: 'other', group: 'common', passed: false },
+    // === 高三下 (Sem 6) ===
+    { sem: 6, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 6, name: "自主學習畢業成果專題", credits: 6, cat: "other", group: "common", tracks: ["all"], mutuallyExclusive: false },
     
-    // 高三下分流科目
-    { id: 's6_1', sem: 6, name: '國語文選修 VI', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's6_2', sem: 6, name: '英語文選修 VI', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's6_3', sem: 6, name: '數學甲 / 數學乙 II', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's6_4', sem: 6, name: '高級電腦 (高級生物)', credits: 4, cat: 'elective', group: 'track', passed: false },
-    { id: 's6_5', sem: 6, name: '加深加廣專門科目 II', credits: 4, cat: 'elective', group: 'track', passed: false },
+    { sem: 6, name: "數學乙", credits: 4, cat: "elective", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
+    { sem: 6, name: "數學甲", credits: 4, cat: "elective", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
+    { sem: 6, name: "國語文選修 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 6, name: "英語文選修 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
+    { sem: 6, name: "專題閱讀與研究 (閩南語文口語溝通與表達)", credits: 2, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: true },
+    { sem: 6, name: "加深加廣專門科目 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false }
   ]
+};
+
+// 轉換為 App 內部 Subjects 資料模型
+function convertCoursesToSubjects(courses) {
+  return courses.map((c, idx) => ({
+    id: `sc113_${c.sem}_${idx}`,
+    sem: c.sem,
+    name: c.name,
+    credits: c.credits,
+    cat: c.cat,
+    group: c.group || 'common',
+    tracks: c.tracks || ['all'],
+    mutuallyExclusive: c.mutuallyExclusive || false,
+    passed: c.sem === 1 // 預設高一上及格
+  }));
+}
+
+const DEFAULT_DATA = {
+  currentGrade: 1, // 預設高一
+  track: 'exp_math_science', // 預設數理實驗班
+  theme: 'light',
+  subjects: convertCoursesToSubjects(ST_CATHERINE_113_DATABASE.courses)
 };
 
 // 班別選單與年級對照表
@@ -101,22 +132,22 @@ const TRACK_OPTIONS_BY_GRADE = {
     { value: 'general_g1', label: '🏫 高一普通班' }
   ],
   2: [
-    { value: 'exp_math_science', label: '🚀 數理實驗班' },
+    { value: 'general_humanities', label: '📚 普通班人文班群' },
+    { value: 'general_science', label: '🔬 普通班數理班群' },
     { value: 'exp_bilingual', label: '✨ 雙語實驗班' },
-    { value: 'general_science', label: '🔬 理組普通班' },
-    { value: 'general_humanities', label: '📚 文組普通班' }
+    { value: 'exp_math_science', label: '🚀 數理實驗班' }
   ],
   3: [
-    { value: 'exp_math_science', label: '🚀 數理實驗班' },
+    { value: 'general_humanities', label: '📚 普通班人文班群' },
+    { value: 'general_science', label: '🔬 普通班數理班群' },
     { value: 'exp_bilingual', label: '✨ 雙語實驗班' },
-    { value: 'general_science', label: '🔬 理組普通班' },
-    { value: 'general_humanities', label: '📚 文組普通班' }
+    { value: 'exp_math_science', label: '🚀 數理實驗班' }
   ]
 };
 
 let appState = {
-  currentGrade: 1, // 預設高一
-  activeSemTab: 1, // 預設高一上
+  currentGrade: 1,
+  activeSemTab: 1,
   track: 'exp_math_science',
   theme: 'light',
   subjects: []
@@ -190,12 +221,13 @@ function loadStateFromLocal() {
       appState = { ...DEFAULT_DATA, ...parsed };
       
       if (!Array.isArray(appState.subjects) || appState.subjects.length === 0) {
-        appState.subjects = JSON.parse(JSON.stringify(DEFAULT_DATA.subjects));
+        appState.subjects = convertCoursesToSubjects(ST_CATHERINE_113_DATABASE.courses);
       } else {
         appState.subjects.forEach(sub => {
           if (typeof sub.passed !== 'boolean') sub.passed = false;
           if (typeof sub.credits !== 'number') sub.credits = 2;
           if (!['required', 'elective', 'other'].includes(sub.cat)) sub.cat = 'other';
+          if (!Array.isArray(sub.tracks)) sub.tracks = ['all'];
         });
       }
     } catch (e) {
@@ -241,6 +273,16 @@ function renderTrackOptions() {
     appState.track = options[0].value;
   }
   dom.trackSelect.value = appState.track;
+}
+
+// 依當前選擇的班別與年級過濾可見的科目
+function getFilteredTrackSubjects() {
+  const currentTrack = appState.track || 'exp_math_science';
+  return appState.subjects.filter(sub => {
+    if (!sub.tracks || sub.tracks.includes('all')) return true;
+    if (currentTrack === 'general_g1') return true;
+    return sub.tracks.includes(currentTrack);
+  });
 }
 
 function bindEvents() {
@@ -311,7 +353,9 @@ function renderDashboard() {
   let rawElectiveEarned = 0;
   let rawOtherEarned = 0;
 
-  appState.subjects.forEach(sub => {
+  const validSubjects = getFilteredTrackSubjects();
+
+  validSubjects.forEach(sub => {
     if (sub.passed) {
       if (sub.cat === 'required') rawCompulsoryEarned += sub.credits;
       else if (sub.cat === 'elective') rawElectiveEarned += sub.credits;
@@ -369,7 +413,7 @@ function renderWarningCard() {
     dom.warningCard.className = 'warning-card state-fresh';
     if (dom.warningLevelPill) dom.warningLevelPill.textContent = '🌱 學習啟航';
     if (dom.warningCalcSummary) dom.warningCalcSummary.textContent = '課程地圖建置完畢';
-    if (dom.warningMessage) dom.warningMessage.textContent = '歡迎來到高中！本學期預計修習 31 學分，勾選通過科目即可掌握畢業進度！';
+    if (dom.warningMessage) dom.warningMessage.textContent = '歡迎來到聖功女中！本學期預計修習 31 學分，勾選通過科目即可掌握畢業進度！';
     if (dom.warningDetails) dom.warningDetails.textContent = '目標指引：三年修滿 150 學分 (必修 102、選修 40)，一起加油！✨';
     return;
   }
@@ -382,8 +426,9 @@ function renderWarningCard() {
   let earnedElective = 0;
 
   let futureMaxTotal = 0;
+  const validSubjects = getFilteredTrackSubjects();
 
-  appState.subjects.forEach(sub => {
+  validSubjects.forEach(sub => {
     if (sub.passed) {
       earnedTotal += sub.credits;
       if (sub.cat === 'required') earnedRequired += sub.credits;
@@ -446,10 +491,11 @@ function renderWarningCard() {
 function renderSemesterTabs() {
   if (!dom.semesterNav) return;
   const buttons = dom.semesterNav.querySelectorAll('.notebook-tab');
+  const validSubjects = getFilteredTrackSubjects();
 
   buttons.forEach(btn => {
     const sem = parseInt(btn.dataset.sem, 10);
-    const semSubjects = appState.subjects.filter(s => s.sem === sem);
+    const semSubjects = validSubjects.filter(s => s.sem === sem);
     const passedCount = semSubjects.filter(s => s.passed).length;
     const badge = document.getElementById(`semBadge${sem}`);
     if (badge) badge.textContent = `${passedCount}/${semSubjects.length}`;
@@ -462,23 +508,23 @@ function renderSemesterTabs() {
   });
 }
 
-// 4. 渲染特定學期科目列表 (含年級防呆鎖定、共同/分流分區呈現、互斥數學對照)
+// 4. 渲染特定學期科目列表 (含年級防呆鎖定、共同/分流分區呈現、互斥二選一標籤)
 function renderSubjectList() {
   if (!dom.subjectListContainer) return;
 
   const currentSem = appState.activeSemTab;
   const currentGrade = appState.currentGrade || 1;
-  const maxUnlockedSem = currentGrade * 2; // 高一:2, 高二:4, 高三:6
+  const maxUnlockedSem = currentGrade * 2;
   const isLocked = currentSem > maxUnlockedSem;
 
   if (dom.currentSemTitle) dom.currentSemTitle.textContent = `${getSemText(currentSem)} 取得學分檢核`;
 
-  // 顯示或隱藏未來學期防呆提示
   if (dom.semLockNotice) {
     dom.semLockNotice.style.display = isLocked ? 'flex' : 'none';
   }
 
-  const subjects = sortSubjects(appState.subjects.filter(s => s.sem === currentSem));
+  const validSubjects = getFilteredTrackSubjects();
+  const subjects = sortSubjects(validSubjects.filter(s => s.sem === currentSem));
   const totalCredits = subjects.reduce((sum, s) => sum + s.credits, 0);
   const passedCredits = subjects.filter(s => s.passed).reduce((sum, s) => sum + s.credits, 0);
 
@@ -502,23 +548,19 @@ function renderSubjectList() {
     return;
   }
 
-  // 高二與高三分區呈現：共同科目 vs 分流科目
   const commonSubjects = subjects.filter(s => s.group === 'common' || currentSem <= 2);
   const trackSubjects = subjects.filter(s => s.group === 'track' && currentSem > 2);
 
   let html = '';
 
   if (trackSubjects.length > 0) {
-    // 渲染全校共同科目區
     if (commonSubjects.length > 0) {
       html += `<div class="section-divider-title">🏛️ 全校共同科目</div>`;
       html += renderSubjectCards(commonSubjects, isLocked);
     }
-    // 渲染班別專屬分流科目區
     html += `<div class="section-divider-title track-section">🔀 班別專屬選修與分流科目</div>`;
     html += renderSubjectCards(trackSubjects, isLocked);
   } else {
-    // 高一或單區塊
     html = renderSubjectCards(subjects, isLocked);
   }
 
@@ -532,6 +574,7 @@ function renderSubjectCards(subjectArray, isLocked) {
         <span class="sub-name">${escapeHtml(sub.name)}</span>
         <span class="tag-credit">${sub.credits}學分</span>
         <span class="tag-cat ${sub.cat}">${getCatText(sub.cat)}</span>
+        ${sub.mutuallyExclusive ? '<span class="tag-exclusive" title="同一時段開設，擇一修讀">🔀 跑班二選一</span>' : ''}
       </div>
       <div class="switch-wrapper">
         <label class="toggle-switch ${isLocked ? 'disabled' : ''}" aria-label="切換 ${escapeHtml(sub.name)} 學分取得狀態">
@@ -580,13 +623,14 @@ function handleResetData() {
 
 function generateFullReportHtml() {
   const gradeText = { 1: '高一', 2: '高二', 3: '高三' }[appState.currentGrade] || '高一';
-  const options = TRACK_OPTIONS_BY_GRADE[appState.currentGrade] || TRACK_OPTIONS_BY_GRADE[1];
-  const trackObj = options.find(o => o.value === appState.track);
-  const trackText = trackObj ? trackObj.label : '數理實驗班';
+  const currentTrack = appState.track || 'exp_math_science';
+  const trackText = ST_CATHERINE_113_DATABASE.trackDefinitions[currentTrack] || '數理實驗班';
   const todayStr = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  const validSubjects = getFilteredTrackSubjects();
+
   let rawComp = 0, rawElec = 0, rawOther = 0;
-  appState.subjects.forEach(s => {
+  validSubjects.forEach(s => {
     if (s.passed) {
       if (s.cat === 'required') rawComp += s.credits;
       else if (s.cat === 'elective') rawElec += s.credits;
@@ -602,7 +646,7 @@ function generateFullReportHtml() {
   let matrixHtml = '';
   for (let sem = 1; sem <= 6; sem++) {
     const semName = getSemText(sem);
-    const semSubjects = sortSubjects(appState.subjects.filter(s => s.sem === sem));
+    const semSubjects = sortSubjects(validSubjects.filter(s => s.sem === sem));
     const semTotal = semSubjects.reduce((a, b) => a + b.credits, 0);
     const semPassed = semSubjects.filter(s => s.passed).reduce((a, b) => a + b.credits, 0);
 
@@ -632,7 +676,7 @@ function generateFullReportHtml() {
   return `
     <div class="export-report-document">
       <div class="rpt-header-box">
-        <h2 class="rpt-main-title">🎓 「畢業啦～」高中畢業學分自我檢核審查報告書</h2>
+        <h2 class="rpt-main-title">🎓 私立聖功女中 113 學年度畢業學分自我檢核審查報告書</h2>
         <div class="rpt-meta-row">
           <span>🎒 <strong>我的年級：</strong> ${gradeText}</span>
           <span>🏫 <strong>我的班別：</strong> ${trackText}</span>
@@ -663,14 +707,14 @@ function generateFullReportHtml() {
         📊 <strong>修習進度評估：</strong> ${totalEarned >= 150 && reqEarned >= 102 && elecEarned >= 40 ? '🎉 恭喜已全數滿足 108 課綱畢業門檻！' : `目前累積 ${totalEarned} 學分，距離 150 總學分還差 ${Math.max(0, 150 - totalEarned)} 學分，請持續努力。`}
       </div>
 
-      <h3 class="rpt-section-title" style="font-size:1.05rem; font-weight:900; margin-bottom:12px; color:#2d3436;">📚 三年 6 個學期完整課程地圖與修習對照總表：</h3>
+      <h3 class="rpt-section-title" style="font-size:1.05rem; font-weight:900; margin-bottom:12px; color:#2d3436;">📚 113 學年度三年 6 個學期完整課程地圖與修習對照總表：</h3>
       
       <div class="rpt-6sem-matrix" id="rpt6SemMatrix">
         ${matrixHtml}
       </div>
 
       <div class="rpt-disclaimer">
-        ⚠️ <strong>正式免責宣告：</strong>本審查報告書由「畢業啦～」App 依學生勾選資料自動繪製產生，僅供個人學習自我檢核參考。不同年度入學之學生學分配置可能不同，正式畢業資格審查請以學校教務處正式核算之成績資料為準！
+        ⚠️ <strong>正式免責宣告：</strong>本審查報告書由「畢業啦～」App 依臺南市私立聖功女中 113 學年度課程地圖與學生勾選資料自動繪製產生，僅供個人學習自我檢核參考。實際畢業資格審查請以學校教務處正式核算之成績資料為準！
       </div>
     </div>
   `;
@@ -697,7 +741,7 @@ async function exportPngReport() {
     wrapper.innerHTML = '';
 
     const link = document.createElement('a');
-    link.download = `畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.png`;
+    link.download = `聖功女中113學年度_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch (err) {
@@ -715,7 +759,7 @@ async function exportPdfReport() {
 
     const documentEl = wrapper.querySelector('.export-report-document');
 
-    const pageHeightPx = Math.floor(800 * (297 / 210)); // ~1131px
+    const pageHeightPx = Math.floor(800 * (297 / 210));
 
     const boxes = documentEl.querySelectorAll('.sem-matrix-box');
     const docTop = documentEl.getBoundingClientRect().top;
@@ -768,7 +812,7 @@ async function exportPdfReport() {
       heightLeft -= pageHeight;
     }
 
-    pdf.save(`畢業啦_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`);
+    pdf.save(`聖功女中113學年度_6學期畢業學分審查報告書_${new Date().toISOString().slice(0,10)}.pdf`);
   } catch (err) {
     alert('PDF 報告書匯出失敗：' + err.message);
   }
