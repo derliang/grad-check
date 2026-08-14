@@ -77,6 +77,27 @@ const DEFAULT_DATA = {
   ]
 };
 
+// 班別選單與年級動態連動對照表 (高一3種, 高二/高三4種)
+const TRACK_OPTIONS_BY_GRADE = {
+  1: [
+    { value: 'exp_science', label: '🚀 理組實驗班' },
+    { value: 'exp_humanities', label: '✨ 文組實驗班' },
+    { value: 'general_g1', label: '🏫 高一普通班' }
+  ],
+  2: [
+    { value: 'exp_science', label: '🚀 理組實驗班' },
+    { value: 'exp_humanities', label: '✨ 文組實驗班' },
+    { value: 'general_science', label: '🔬 理組普通班' },
+    { value: 'general_humanities', label: '📚 文組普通班' }
+  ],
+  3: [
+    { value: 'exp_science', label: '🚀 理組實驗班' },
+    { value: 'exp_humanities', label: '✨ 文組實驗班' },
+    { value: 'general_science', label: '🔬 理組普通班' },
+    { value: 'general_humanities', label: '📚 文組普通班' }
+  ]
+};
+
 // 狀態管理 State
 let appState = {
   currentGrade: 2, // 高一:1, 高二:2, 高三:3
@@ -106,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!appState.activeSemTab) {
     appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 2);
   }
+  renderTrackOptions();
   initTheme();
   bindEvents();
   renderAll();
@@ -144,15 +166,35 @@ function initTheme() {
   }
 }
 
+// 動態依年級渲染班別選單 (高一3種, 高二/高三4種)
+function renderTrackOptions() {
+  const select = document.getElementById('trackSelect');
+  if (!select) return;
+
+  const currentGrade = appState.currentGrade || 2;
+  const options = TRACK_OPTIONS_BY_GRADE[currentGrade] || TRACK_OPTIONS_BY_GRADE[2];
+
+  select.innerHTML = options.map(opt => `
+    <option value="${opt.value}">${opt.label}</option>
+  `).join('');
+
+  const isValidTrack = options.some(opt => opt.value === appState.track);
+  if (!isValidTrack) {
+    appState.track = options[0].value;
+  }
+  select.value = appState.track;
+}
+
 // 綁定事件監聽器
 function bindEvents() {
-  // 當前就讀年級 Selector
+  // 當前就讀年級 Selector (切換年級連動更新班別選單)
   const gradeSelect = document.getElementById('currentGradeSelect');
   if (gradeSelect) {
     gradeSelect.value = appState.currentGrade || 2;
     gradeSelect.addEventListener('change', (e) => {
       appState.currentGrade = parseInt(e.target.value, 10);
       appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade);
+      renderTrackOptions();
       saveStateToLocal();
       renderAll();
     });
@@ -161,7 +203,6 @@ function bindEvents() {
   // 班別選擇 Selector
   const trackSelect = document.getElementById('trackSelect');
   if (trackSelect) {
-    trackSelect.value = appState.track || 'exp_science';
     trackSelect.addEventListener('change', (e) => {
       appState.track = e.target.value;
       saveStateToLocal();
