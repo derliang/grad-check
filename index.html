@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>畢業啦～ 🎓 高中畢業學分自我檢核 App</title>
+  <meta name="description" content="專為高中學生設計的手機端畢業學分自我檢核與學習預警 App。極速、活潑可愛、資料 100% 本地保存！">
+  <!-- Google Fonts: Zen Maru Gothic & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🎓</span>
+        <div class="brand-text">
+          <h1 class="app-title">畢業啦～</h1>
+          <span class="app-subtitle">高中學分檢核 & 畢業預警</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="icon-btn" title="切換主題" aria-label="切換主題">🌙</button>
+        <button id="settingsBtn" class="icon-btn" title="設定與資料管理" aria-label="設定與資料管理">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Student Status & Grade Selector Bar -->
+    <section class="student-status-bar">
+      <div class="status-label">
+        <span class="status-icon">🎒</span>
+        <span>我目前就讀：</span>
+      </div>
+      <select id="currentGradeSelect" class="grade-select">
+        <option value="1">高一上</option>
+        <option value="2">高一下</option>
+        <option value="3">高二上</option>
+        <option value="4" selected>高二下</option>
+        <option value="5">高三上</option>
+        <option value="6">高三下</option>
+      </select>
+    </section>
+
+    <!-- Fixed Real-Time Credit Dashboard (Sticky) -->
+    <section class="sticky-dashboard">
+      <div class="dashboard-main-ring">
+        <div class="ring-content">
+          <div class="ring-number" id="totalEarnedVal">0</div>
+          <div class="ring-label">/ 150 總學分</div>
+        </div>
+        <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
+      </div>
+
+      <!-- 3 Key Credit Category Bars -->
+      <div class="category-bars-grid">
+        <!-- 1. Required -->
+        <div class="cat-card required-card">
+          <div class="cat-header">
+            <span class="cat-dot"></span>
+            <span class="cat-title">部定必修</span>
+            <span class="cat-count"><strong id="reqEarnedVal">0</strong> / 102</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill required-fill" id="reqProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 2. Elective -->
+        <div class="cat-card elective-card">
+          <div class="cat-header">
+            <span class="cat-dot"></span>
+            <span class="cat-title">選修學分</span>
+            <span class="cat-count"><strong id="elecEarnedVal">0</strong> / 40</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill elective-fill" id="elecProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 3. Other & School Required -->
+        <div class="cat-card other-card">
+          <div class="cat-header">
+            <span class="cat-dot"></span>
+            <span class="cat-title">校訂與其他</span>
+            <span class="cat-count"><strong id="otherEarnedVal">0</strong> 學分</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill other-fill" id="otherProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Graduation Warning & Analysis Card -->
+    <section class="warning-section">
+      <div class="warning-card" id="warningCard">
+        <div class="warning-badge-row">
+          <span class="warning-pill" id="warningLevelPill">🟢 畢業安全</span>
+          <span class="warning-calc-text" id="warningCalcSummary">推估最高可得: -- 學分</span>
+        </div>
+        <div class="warning-message" id="warningMessage">
+          讀取學分狀態中...
+        </div>
+        <div class="warning-details" id="warningDetails"></div>
+      </div>
+    </section>
+
+    <!-- Semester Tab Bar (6 Semesters) -->
+    <nav class="semester-nav-wrapper">
+      <div class="semester-nav" id="semesterNav">
+        <button class="sem-btn active" data-sem="1">高一上 <span class="sem-badge" id="semBadge1">0</span></button>
+        <button class="sem-btn" data-sem="2">高一下 <span class="sem-badge" id="semBadge2">0</span></button>
+        <button class="sem-btn" data-sem="3">高二上 <span class="sem-badge" id="semBadge3">0</span></button>
+        <button class="sem-btn" data-sem="4">高二下 <span class="sem-badge" id="semBadge4">0</span></button>
+        <button class="sem-btn" data-sem="5">高三上 <span class="sem-badge" id="semBadge5">0</span></button>
+        <button class="sem-btn" data-sem="6">高三下 <span class="sem-badge" id="semBadge6">0</span></button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area: Subject List for Selected Semester -->
+    <main class="main-content">
+      <div class="semester-header-bar">
+        <div class="sem-title-box">
+          <h2 class="current-sem-title" id="currentSemTitle">高一上 學期科目</h2>
+          <span class="current-sem-stats" id="currentSemStats">已取得 0 / 0 學分</span>
+        </div>
+        <button id="addSubjectBtn" class="add-btn">+ 新增科目</button>
+      </div>
+
+      <!-- Subject Items Grid/List -->
+      <div class="subject-list" id="subjectListContainer">
+        <!-- Dynamic JS Insertion -->
+      </div>
+    </main>
+
+    <!-- Footer Information -->
+    <footer class="app-footer">
+      <p class="footer-quote">✨ 每一分努力，都是邁向畢業的腳步！ ✨</p>
+      <div class="footer-links">
+        <button id="resetDataBtn" class="text-link">重置預設檔</button>
+        <span>•</span>
+        <button id="exportJsonBtn" class="text-link">備份資料 (JSON)</button>
+        <span>•</span>
+        <button id="importJsonBtn" class="text-link">匯入備份</button>
+      </div>
+      <p class="copyright">畢業啦～ App • 純 Local 離線無雲端 • 支援 108 課綱</p>
+    </footer>
+  </div>
+
+  <!-- Modal: Add / Edit Subject -->
+  <div class="modal-overlay" id="subjectModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">新增科目學分</h3>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="subjectForm">
+          <input type="hidden" id="editSubjectId" value="">
+          <div class="form-group">
+            <label for="subNameInput">科目名稱</label>
+            <input type="text" id="subNameInput" placeholder="例如：加深加廣選修" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="subCreditsInput">學分數</label>
+              <input type="number" id="subCreditsInput" min="1" max="10" value="2" required>
+            </div>
+            <div class="form-group">
+              <label for="subCategorySelect">類別</label>
+              <select id="subCategorySelect">
+                <option value="required">部定必修 (目標102)</option>
+                <option value="elective">選修學分 (目標40)</option>
+                <option value="other">校訂與其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="cancelModalBtn">取消</button>
+            <button type="submit" class="btn btn-primary" id="saveSubjectBtn">儲存科目</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Settings & JSON Import -->
+  <div class="modal-overlay" id="settingsModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙️ 設定與資料管理</h3>
+        <button class="modal-close" id="closeSettingsBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <h4>🎓 畢業標準設定 (108課綱預設)</h4>
+          <div class="setting-item">
+            <span>畢業總學分門檻</span>
+            <strong>150 學分</strong>
+          </div>
+          <div class="setting-item">
+            <span>部定必修合格門檻</span>
+            <strong>102 學分</strong>
+          </div>
+          <div class="setting-item">
+            <span>選修學分合格門檻</span>
+            <strong>40 學分</strong>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4>📦 資料備份與移轉</h4>
+          <p class="setting-desc">資料均存在此手機離線空間，不會上傳任何伺服器。</p>
+          <div class="setting-actions">
+            <button id="modalExportBtn" class="btn btn-outline">📥 下載備份 (JSON)</button>
+            <button id="modalImportBtn" class="btn btn-outline">📤 匯入備份 (JSON)</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none">
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4>🌐 部署與分享</h4>
+          <p class="setting-desc">本程式可直接上傳至 GitHub Pages 免費託管。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
