@@ -80,12 +80,12 @@ html, body {
   flex-direction: column;
   position: relative;
   overflow-x: hidden;
-  padding-bottom: 74px; /* Space for notebook index tabs */
+  padding-bottom: 74px;
 }
 
-/* Header */
+/* Header - 凸顯圖示與標題 */
 .app-header {
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: var(--card-bg);
   display: flex;
   justify-content: space-between;
@@ -96,28 +96,31 @@ html, body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .brand-icon {
-  font-size: 1.6rem;
+  font-size: 2.2rem; /* 顯著放大學士帽圖示 */
   line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(108, 92, 231, 0.3));
 }
 
 .app-title {
-  font-size: 1.15rem;
+  font-size: 1.45rem; /* 大幅凸顯主標題 */
   font-weight: 900;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .app-subtitle {
-  font-size: 0.68rem;
+  font-size: 0.76rem;
+  font-weight: 700;
   color: var(--text-sub);
   display: block;
-  margin-top: -2px;
+  margin-top: 1px;
 }
 
 .header-actions {
@@ -156,18 +159,33 @@ html, body {
   transform: scale(0.92);
 }
 
+/* Icon Buttons */
 .icon-btn {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 0.95rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: transform 0.15s ease;
+}
+
+/* 誇張醒目的炸彈按鈕 💣 */
+.icon-btn.btn-bomb {
+  font-size: 1.35rem; /* 大幅放大炸彈 */
+  width: 38px;
+  height: 38px;
+  background: #fff0f3;
+  border: 2px solid #ff4757;
+  box-shadow: 0 4px 10px rgba(255, 71, 87, 0.25);
+}
+
+.icon-btn.btn-bomb:active {
+  transform: scale(1.18) rotate(15deg);
 }
 
 .icon-btn:active {
@@ -277,7 +295,7 @@ html, body {
   color: #00b894;
 }
 
-/* 3 Category Progress Bars Grid (與標籤色彩一致) */
+/* 3 Category Progress Bars Grid */
 .category-bars-grid {
   display: flex;
   flex-direction: column;
@@ -347,7 +365,7 @@ html, body {
 .elective-fill { background: var(--elec-gradient); }
 .other-fill { background: var(--other-gradient); }
 
-/* Learning Graduation Warning Card & Disclaimer (適應性學涯與歷史趨勢) */
+/* Learning Graduation Warning Card & Disclaimer */
 .warning-section {
   padding: 10px 16px 4px;
 }
@@ -456,7 +474,7 @@ html, body {
   white-space: nowrap;
 }
 
-/* Subject List Items (Single Row & Long Name Auto-Wrap) */
+/* Subject List Items */
 .subject-list {
   display: flex;
   flex-direction: column;
@@ -477,7 +495,6 @@ html, body {
   min-height: 44px;
 }
 
-/* 及格時頭部邊條 - 獨立專屬藍色 */
 .subject-item.passed {
   border-left: 4px solid var(--passed-accent);
 }
@@ -525,7 +542,6 @@ html, body {
   flex-shrink: 0;
 }
 
-/* 校訂必修與部定必修統一為玫瑰粉/紅色標籤 */
 .tag-cat.required {
   background: var(--req-bg);
   color: var(--req-color);
@@ -541,7 +557,7 @@ html, body {
   color: var(--other-color);
 }
 
-/* 極簡 Switch 開關 - 無贅字 */
+/* Switch Wrapper */
 .switch-wrapper {
   display: flex;
   align-items: center;
@@ -678,7 +694,7 @@ input:checked + .slider:before {
   color: #ffffff;
 }
 
-/* Footer (極簡) */
+/* Footer */
 .app-footer {
   padding: 20px 16px 30px;
   text-align: center;

@@ -85,7 +85,7 @@ const DEFAULT_DATA = {
   ]
 };
 
-// 班別選單與年級對照表 (高一3種, 高二/高三4種，含更名後班別名稱)
+// 班別選單與年級對照表
 const TRACK_OPTIONS_BY_GRADE = {
   1: [
     { value: 'exp_math_science', label: '🚀 數理實驗班' },
@@ -291,7 +291,6 @@ function renderDashboard() {
   }
 }
 
-// 適應性年級與歷史趨勢預警演算法
 function renderWarningCard() {
   const currentSem = getAutoSemesterByDate(appState.currentGrade);
 
@@ -301,7 +300,6 @@ function renderWarningCard() {
   const message = document.getElementById('warningMessage');
   const details = document.getElementById('warningDetails');
 
-  // 特殊處理 1：高一新生剛入學 (高一上學期) - 溫馨啟航指引！
   if (appState.currentGrade === 1 && currentSem === 1) {
     card.className = 'warning-card state-fresh';
     pill.textContent = '🌱 學習啟航';
@@ -346,7 +344,7 @@ function renderWarningCard() {
     card.className = 'warning-card state-safe';
     pill.textContent = '🎓 達標恭喜';
     message.textContent = '恭喜！您目前的修習學分已完全滿足 108 課綱畢業門檻！🎉';
-    details.textContent = '部定及校訂必修 ≥ 102、選修 ≥ 40，總學分 ≥ 150 皆全數解鎖成功！';
+    details.textContent = '必修 ≥ 102、選修 ≥ 40，總學分 ≥ 150 皆全數解鎖成功！';
     triggerConfetti();
     return;
   }
@@ -474,7 +472,6 @@ function toggleSubjectPassed(id, passed) {
   }
 }
 
-// 重置資料 - 帶有炸彈圖示與明確警告警語
 function handleResetData() {
   if (confirm('⚠️ 警告：確定要重置所有勾選紀錄嗎？\n\n此操作將會清空您目前所有學分數據並恢復為初始預設值，此動作無法復原。')) {
     appState = JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -484,7 +481,6 @@ function handleResetData() {
   }
 }
 
-// 📄 🖼️ 展開式全 6 學期正式畢業審查報告書 HTML 生成
 function generateFullReportHtml() {
   const gradeText = { 1: '高一', 2: '高二', 3: '高三' }[appState.currentGrade] || '高二';
   const options = TRACK_OPTIONS_BY_GRADE[appState.currentGrade] || TRACK_OPTIONS_BY_GRADE[2];
@@ -553,11 +549,11 @@ function generateFullReportHtml() {
           <span class="rpt-dash-val">${totalEarned} / 150</span>
         </div>
         <div class="rpt-dash-card">
-          <span class="rpt-dash-title">部定及校訂必修</span>
+          <span class="rpt-dash-title">必修</span>
           <span class="rpt-dash-val">${reqEarned} / 102</span>
         </div>
         <div class="rpt-dash-card">
-          <span class="rpt-dash-title">選修學分</span>
+          <span class="rpt-dash-title">選修</span>
           <span class="rpt-dash-val">${elecEarned} / 40</span>
         </div>
         <div class="rpt-dash-card">
@@ -583,7 +579,6 @@ function generateFullReportHtml() {
   `;
 }
 
-// 🖼️ 匯出全 6 學期 PNG 長圖
 async function exportPngReport() {
   try {
     const wrapper = document.getElementById('exportReportWrapper');
@@ -610,7 +605,6 @@ async function exportPngReport() {
   }
 }
 
-// 📄 匯出全 6 學期矢量文字型 PDF 報告書 (含分頁防截斷)
 async function exportPdfReport() {
   try {
     const wrapper = document.getElementById('exportReportWrapper');
@@ -672,7 +666,7 @@ function getSemText(sem) {
 }
 
 function getCatText(cat) {
-  const map = { 'required': '部定及校訂必修', 'elective': '選修學分', 'other': '其他必選修' };
+  const map = { 'required': '必修', 'elective': '選修', 'other': '其他必選修' };
   return map[cat] || '一般';
 }
 

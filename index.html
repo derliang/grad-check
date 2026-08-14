@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=17.0">
+  <link rel="stylesheet" href="style.css?v=18.0">
 </head>
 <body>
   <div class="app-container">
@@ -72,13 +72,13 @@
         <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
       </div>
 
-      <!-- 3 Key Credit Category Bars -->
+      <!-- 3 Key Credit Category Bars (精簡名稱：必修, 選修, 其他必選修) -->
       <div class="category-bars-grid">
-        <!-- 1. Compulsory -->
+        <!-- 1. Compulsory (必修) -->
         <div class="cat-card required-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
-            <span class="cat-title">部定及校訂必修</span>
+            <span class="cat-title">必修</span>
             <span class="cat-count"><strong id="reqEarnedVal">0</strong> / 102</span>
           </div>
           <div class="progress-track">
@@ -86,11 +86,11 @@
           </div>
         </div>
 
-        <!-- 2. Elective -->
+        <!-- 2. Elective (選修) -->
         <div class="cat-card elective-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
-            <span class="cat-title">選修學分</span>
+            <span class="cat-title">選修</span>
             <span class="cat-count"><strong id="elecEarnedVal">0</strong> / 40</span>
           </div>
           <div class="progress-track">
@@ -98,7 +98,7 @@
           </div>
         </div>
 
-        <!-- 3. Other -->
+        <!-- 3. Other (其他必選修) -->
         <div class="cat-card other-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
@@ -112,7 +112,7 @@
       </div>
     </section>
 
-    <!-- Graduation Warning & Analysis Card (適應性學涯與趨勢預警) -->
+    <!-- Graduation Warning & Analysis Card -->
     <section class="warning-section">
       <div class="warning-card" id="warningCard">
         <div class="warning-badge-row">
@@ -189,6 +189,6 @@
     <!-- Rendered dynamically by JS during export -->
   </div>
 
-  <script src="app.js?v=17.0"></script>
+  <script src="app.js?v=18.0"></script>
 </body>
 </html>
