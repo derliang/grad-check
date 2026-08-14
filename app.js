@@ -79,15 +79,29 @@ const DEFAULT_DATA = {
 
 // 狀態管理 State
 let appState = {
-  currentGrade: 4,
-  activeSemTab: 1,
+  currentGrade: 2, // 高一:1, 高二:2, 高三:3
+  activeSemTab: 3, // 1~6
+  track: 'general_humanities',
   theme: 'light',
   subjects: []
 };
 
+// 自動根據當前月份判斷學期 (8月～1月為上學期，2月～7月為下學期)
+function getAutoSemesterByDate(gradeNum) {
+  const month = new Date().getMonth() + 1; // 1~12
+  const isFall = (month >= 8 || month === 1);
+  if (gradeNum === 1) return isFall ? 1 : 2;
+  if (gradeNum === 2) return isFall ? 3 : 4;
+  if (gradeNum === 3) return isFall ? 5 : 6;
+  return isFall ? 3 : 4;
+}
+
 // 初始化 App
 document.addEventListener('DOMContentLoaded', () => {
   loadStateFromLocal();
+  if (!appState.activeSemTab) {
+    appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade || 2);
+  }
   initTheme();
   bindEvents();
   renderAll();
@@ -128,14 +142,17 @@ function initTheme() {
 
 // 綁定事件監聽器
 function bindEvents() {
-  // 當前就讀學期 Selector
+  // 當前就讀年級 Selector
   const gradeSelect = document.getElementById('currentGradeSelect');
-  gradeSelect.value = appState.currentGrade;
-  gradeSelect.addEventListener('change', (e) => {
-    appState.currentGrade = parseInt(e.target.value, 10);
-    saveStateToLocal();
-    renderAll();
-  });
+  if (gradeSelect) {
+    gradeSelect.value = appState.currentGrade || 2;
+    gradeSelect.addEventListener('change', (e) => {
+      appState.currentGrade = parseInt(e.target.value, 10);
+      appState.activeSemTab = getAutoSemesterByDate(appState.currentGrade);
+      saveStateToLocal();
+      renderAll();
+    });
+  }
 
   // 班別與組別 Selector
   const trackSelect = document.getElementById('trackSelect');
@@ -248,7 +265,7 @@ function renderDashboard() {
 
 // 2. 畢業學習預警計算演算法 (Graduation Warning System)
 function renderWarningCard() {
-  const currentSem = appState.currentGrade; // 1 ~ 6
+  const currentSem = getAutoSemesterByDate(appState.currentGrade); // 1 ~ 6 依目前月份動態判定當前學期
 
   let earnedTotal = 0;
   let earnedRequired = 0;
