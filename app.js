@@ -5,8 +5,8 @@ const STORAGE_KEY = 'grad_check_app_data_v1';
 
 // 預設 108 課綱範本數據
 const DEFAULT_DATA = {
-  currentGrade: 4, // 預設就讀 高二下 (Semester 4)
-  track: 'general_humanities', // 預設組別：文組普通班
+  currentGrade: 2, // 高一:1, 高二:2, 高三:3
+  track: 'exp_science',
   theme: 'light',
   subjects: [
     // === 高一上 (Sem 1) ===
@@ -161,7 +161,7 @@ function bindEvents() {
   // 班別與組別 Selector
   const trackSelect = document.getElementById('trackSelect');
   if (trackSelect) {
-    trackSelect.value = appState.track || 'general_humanities';
+    trackSelect.value = appState.track || 'exp_science';
     trackSelect.addEventListener('change', (e) => {
       appState.track = e.target.value;
       saveStateToLocal();
