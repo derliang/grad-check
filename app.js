@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v22.0 精緻標籤版) */
+/* 畢業啦～ 🎓 高中學分檢核 App - 核心邏輯 (v23.0 動態避切 PDF 算術引擎版) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
@@ -453,7 +453,6 @@ function renderSemesterTabs() {
   });
 }
 
-// 4. 渲染特定學期科目列表 (更名為：取得學分檢核，含 100% 高彩彩蛋)
 function renderSubjectList() {
   if (!dom.subjectListContainer) return;
 
@@ -565,7 +564,7 @@ function generateFullReportHtml() {
     const semPassed = semSubjects.filter(s => s.passed).reduce((a, b) => a + b.credits, 0);
 
     matrixHtml += `
-      <div class="sem-matrix-box">
+      <div class="sem-matrix-box" data-sem="${sem}">
         <div class="sem-matrix-title">
           <span>📅 ${semName}</span>
           <span>${semPassed} / ${semTotal} 學分</span>
@@ -621,9 +620,9 @@ function generateFullReportHtml() {
         📊 <strong>修習進度評估：</strong> ${totalEarned >= 150 && reqEarned >= 102 && elecEarned >= 40 ? '🎉 恭喜已全數滿足 108 課綱畢業門檻！' : `目前累積 ${totalEarned} 學分，距離 150 總學分還差 ${Math.max(0, 150 - totalEarned)} 學分，請持續努力。`}
       </div>
 
-      <h3 style="font-size:1.05rem; font-weight:900; margin-bottom:12px; color:#2d3436;">📚 三年 6 個學期完整課程地圖與修習對照總表：</h3>
+      <h3 class="rpt-section-title" style="font-size:1.05rem; font-weight:900; margin-bottom:12px; color:#2d3436;">📚 三年 6 個學期完整課程地圖與修習對照總表：</h3>
       
-      <div class="rpt-6sem-matrix">
+      <div class="rpt-6sem-matrix" id="rpt6SemMatrix">
         ${matrixHtml}
       </div>
 
@@ -634,6 +633,7 @@ function generateFullReportHtml() {
   `;
 }
 
+// 🖼️ 匯出 PNG 長圖
 async function exportPngReport() {
   try {
     const wrapper = dom.exportReportWrapper;
@@ -663,6 +663,7 @@ async function exportPngReport() {
   }
 }
 
+// 📄 匯出全 6 學期精美 A4 PDF 報告書 (含「動態智慧避切算術引擎」：無論學分表如何變動，卡片即將跨頁時自動整包推至下一頁頂端)
 async function exportPdfReport() {
   try {
     const wrapper = dom.exportReportWrapper;
@@ -671,9 +672,38 @@ async function exportPdfReport() {
     wrapper.innerHTML = generateFullReportHtml();
     wrapper.style.display = 'block';
 
-    const element = wrapper.querySelector('.export-report-document');
+    const documentEl = wrapper.querySelector('.export-report-document');
 
-    const canvas = await html2canvas(element, {
+    // === 動態智慧避切算術引擎 (Dynamic Page-Break Avoidance Engine) ===
+    // 依據 A4 比例，計算 800px 寬度對應的 A4 頁高 (約 1131px)
+    const pageHeightPx = Math.floor(800 * (297 / 210)); // ~1131px
+
+    const boxes = documentEl.querySelectorAll('.sem-matrix-box');
+    const docTop = documentEl.getBoundingClientRect().top;
+
+    boxes.forEach(box => {
+      box.style.marginTop = '0px'; // 先重置
+    });
+
+    // 依序檢查每個卡片底部位址，若卡片橫跨 A4 頁尾邊界，則動態計算 margin-top 將整包推至下一頁頂端！
+    boxes.forEach(box => {
+      const rect = box.getBoundingClientRect();
+      const topOffset = rect.top - docTop;
+      const bottomOffset = rect.bottom - docTop;
+
+      const pageIndexOfTop = Math.floor(topOffset / pageHeightPx);
+      const pageIndexOfBottom = Math.floor(bottomOffset / pageHeightPx);
+
+      // 若卡片橫跨 A4 分頁邊界 (Top 與 Bottom 在不同頁)
+      if (pageIndexOfTop !== pageIndexOfBottom) {
+        const nextPageTop = (pageIndexOfTop + 1) * pageHeightPx;
+        const pushDistance = nextPageTop - topOffset + 24; // 加 24px 間距
+        box.style.marginTop = `${pushDistance}px`;
+      }
+    });
+
+    // 算術推算完成後，繪製 high-res canvas 貼入 PDF
+    const canvas = await html2canvas(documentEl, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
