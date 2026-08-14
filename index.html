@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=14.0">
+  <link rel="stylesheet" href="style.css?v=15.0">
 </head>
 <body>
   <div class="app-container">
@@ -36,26 +36,28 @@
       </div>
     </header>
 
-    <!-- Student Status Bar (年級跟班別在同一列) -->
+    <!-- Student Status Bar (我的年級與我的班別 分開兩行獨立顯示) -->
     <section class="student-status-bar">
-      <div class="status-single-row">
-        <div class="status-col">
+      <div class="status-row">
+        <div class="status-label">
           <span class="status-icon">🎒</span>
-          <span class="status-label-text">年級：</span>
-          <select id="currentGradeSelect" class="grade-select">
-            <option value="1">高一</option>
-            <option value="2" selected>高二</option>
-            <option value="3">高三</option>
-          </select>
+          <span>我的年級：</span>
         </div>
-        
-        <div class="status-col">
+        <select id="currentGradeSelect" class="grade-select">
+          <option value="1">高一</option>
+          <option value="2" selected>高二</option>
+          <option value="3">高三</option>
+        </select>
+      </div>
+      
+      <div class="status-row">
+        <div class="status-label">
           <span class="status-icon">🏫</span>
-          <span class="status-label-text">班別：</span>
-          <select id="trackSelect" class="track-select">
-            <!-- Dynamic JS Population based on Grade -->
-          </select>
+          <span>我的班別：</span>
         </div>
+        <select id="trackSelect" class="track-select">
+          <!-- Dynamic JS Population based on Grade -->
+        </select>
       </div>
     </section>
 
@@ -69,9 +71,9 @@
         <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
       </div>
 
-      <!-- 3 Key Credit Category Bars (108 課綱最新標準) -->
+      <!-- 3 Key Credit Category Bars -->
       <div class="category-bars-grid">
-        <!-- 1. Compulsory (部定及校訂必修 Target 102) -->
+        <!-- 1. Compulsory -->
         <div class="cat-card required-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
@@ -83,7 +85,7 @@
           </div>
         </div>
 
-        <!-- 2. Elective (選修學分 Target 40) -->
+        <!-- 2. Elective -->
         <div class="cat-card elective-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
@@ -95,7 +97,7 @@
           </div>
         </div>
 
-        <!-- 3. Other (其他必選修) -->
+        <!-- 3. Other -->
         <div class="cat-card other-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
@@ -120,6 +122,9 @@
           讀取學分狀態中...
         </div>
         <div class="warning-details" id="warningDetails"></div>
+        <div class="warning-disclaimer">
+          💡 小提醒：本檢核與預警推估僅供學生自我學習參考，實際畢業資格請以學校教務處正式核算之成績資料為準。
+        </div>
       </div>
     </section>
 
@@ -170,7 +175,6 @@
 
     <!-- Footer Information -->
     <footer class="app-footer">
-      <!-- 醒目頁尾警語 -->
       <div class="footer-alert-box">
         <span class="alert-icon">⚠️</span>
         <p class="alert-text"><strong>注意：</strong>不同年度入學的學生可能學分配置不同，本程式資料如果有誤，請以教務處資料為準！</p>
@@ -183,6 +187,6 @@
     </footer>
   </div>
 
-  <script src="app.js?v=14.0"></script>
+  <script src="app.js?v=15.0"></script>
 </body>
 </html>
