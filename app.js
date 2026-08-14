@@ -247,21 +247,34 @@ function renderAll() {
   renderSubjectList();
 }
 
-// 1. 渲染固定即時 Dashboard 欄位
+// 1. 渲染固定即時 Dashboard 欄位 (108 課綱學分優先充填演算法)
 function renderDashboard() {
-  let reqEarned = 0;
-  let elecEarned = 0;
-  let otherEarned = 0;
+  let rawCompulsoryEarned = 0;
+  let rawElectiveEarned = 0;
+  let rawOtherEarned = 0;
 
   appState.subjects.forEach(sub => {
     if (sub.passed) {
-      if (sub.cat === 'required') reqEarned += sub.credits;
-      else if (sub.cat === 'elective') elecEarned += sub.credits;
-      else otherEarned += sub.credits;
+      if (sub.cat === 'required') rawCompulsoryEarned += sub.credits;
+      else if (sub.cat === 'elective') rawElectiveEarned += sub.credits;
+      else rawOtherEarned += sub.credits;
     }
   });
 
-  const totalEarned = reqEarned + elecEarned + otherEarned;
+  // 優先權充填演算法：
+  // 1. 部定及校訂必修 優先計入至 102 學分，超過 102 的溢出至「其他必選修」
+  const reqEarned = Math.min(102, rawCompulsoryEarned);
+  const overflowCompulsory = Math.max(0, rawCompulsoryEarned - 102);
+
+  // 2. 選修學分 優先計入至 40 學分，超過 40 的溢出至「其他必選修」
+  const elecEarned = Math.min(40, rawElectiveEarned);
+  const overflowElective = Math.max(0, rawElectiveEarned - 40);
+
+  // 3. 其他必選修 = 原其他學分 + 必修溢出學分 + 選修溢出學分
+  const otherEarned = rawOtherEarned + overflowCompulsory + overflowElective;
+
+  // 4. 總取得學分
+  const totalEarned = rawCompulsoryEarned + rawElectiveEarned + rawOtherEarned;
 
   document.getElementById('totalEarnedVal').textContent = totalEarned;
   document.getElementById('reqEarnedVal').textContent = reqEarned;
@@ -274,7 +287,7 @@ function renderDashboard() {
 
   const reqPct = Math.min(100, Math.round((reqEarned / REQ_GOAL) * 100));
   const elecPct = Math.min(100, Math.round((elecEarned / ELEC_GOAL) * 100));
-  const otherPct = Math.min(100, Math.round((otherEarned / 20) * 100));
+  const otherPct = Math.min(100, Math.round((otherEarned / 8) * 100)); // 剩餘 8 學分達標參考
 
   document.getElementById('reqProgressFill').style.width = `${reqPct}%`;
   document.getElementById('elecProgressFill').style.width = `${elecPct}%`;
@@ -552,7 +565,7 @@ function getSemText(sem) {
 }
 
 function getCatText(cat) {
-  const map = { 'required': '部定必修', 'elective': '選修學分', 'other': '校訂與其他' };
+  const map = { 'required': '部定及校訂必修', 'elective': '選修學分', 'other': '其他必選修' };
   return map[cat] || '一般';
 }
 

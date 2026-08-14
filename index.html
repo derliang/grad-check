@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=11.0">
+  <link rel="stylesheet" href="style.css?v=12.0">
 </head>
 <body>
   <div class="app-container">
@@ -36,28 +36,26 @@
       </div>
     </header>
 
-    <!-- Student Status & Track Selector Bar -->
+    <!-- Student Status Bar (年級跟班別在同一列) -->
     <section class="student-status-bar">
-      <div class="status-row">
-        <div class="status-label">
+      <div class="status-single-row">
+        <div class="status-col">
           <span class="status-icon">🎒</span>
-          <span>年級：</span>
+          <span class="status-label-text">年級：</span>
+          <select id="currentGradeSelect" class="grade-select">
+            <option value="1">高一</option>
+            <option value="2" selected>高二</option>
+            <option value="3">高三</option>
+          </select>
         </div>
-        <select id="currentGradeSelect" class="grade-select">
-          <option value="1">高一</option>
-          <option value="2" selected>高二</option>
-          <option value="3">高三</option>
-        </select>
-      </div>
-      
-      <div class="status-row">
-        <div class="status-label">
+        
+        <div class="status-col">
           <span class="status-icon">🏫</span>
-          <span>班別：</span>
+          <span class="status-label-text">班別：</span>
+          <select id="trackSelect" class="track-select">
+            <!-- Dynamic JS Population based on Grade -->
+          </select>
         </div>
-        <select id="trackSelect" class="track-select">
-          <!-- Dynamic JS Population based on Grade -->
-        </select>
       </div>
     </section>
 
@@ -71,13 +69,13 @@
         <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
       </div>
 
-      <!-- 3 Key Credit Category Bars -->
+      <!-- 3 Key Credit Category Bars (108 課綱最新標準) -->
       <div class="category-bars-grid">
-        <!-- 1. Required -->
+        <!-- 1. Compulsory (部定及校訂必修 Target 102) -->
         <div class="cat-card required-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
-            <span class="cat-title">部定必修</span>
+            <span class="cat-title">部定及校訂必修</span>
             <span class="cat-count"><strong id="reqEarnedVal">0</strong> / 102</span>
           </div>
           <div class="progress-track">
@@ -85,7 +83,7 @@
           </div>
         </div>
 
-        <!-- 2. Elective -->
+        <!-- 2. Elective (選修學分 Target 40) -->
         <div class="cat-card elective-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
@@ -97,11 +95,11 @@
           </div>
         </div>
 
-        <!-- 3. Other & School Required -->
+        <!-- 3. Other (其他必選修) -->
         <div class="cat-card other-card">
           <div class="cat-header">
             <span class="cat-dot"></span>
-            <span class="cat-title">校訂與其他</span>
+            <span class="cat-title">其他必選修</span>
             <span class="cat-count"><strong id="otherEarnedVal">0</strong> 學分</span>
           </div>
           <div class="progress-track">
@@ -179,6 +177,6 @@
     </footer>
   </div>
 
-  <script src="app.js?v=11.0"></script>
+  <script src="app.js?v=12.0"></script>
 </body>
 </html>

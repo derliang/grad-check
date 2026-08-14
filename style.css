@@ -172,45 +172,53 @@ html, body {
   transform: scale(0.9);
 }
 
-/* Student Status & Track Selector Bar */
+/* Student Status & Track Selector Bar (Single Row) */
 .student-status-bar {
-  padding: 10px 16px;
+  padding: 10px 14px;
   background: var(--card-bg);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   border-bottom: 1px solid var(--border-color);
 }
 
-.status-row {
+.status-single-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
+  width: 100%;
 }
 
-.status-label {
-  font-size: 0.88rem;
-  font-weight: 700;
+.status-col {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.status-label-text {
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--text-main);
   white-space: nowrap;
 }
 
+.status-icon {
+  font-size: 0.95rem;
+}
+
 .grade-select, .track-select {
-  padding: 6px 10px;
+  padding: 6px 8px;
   border-radius: 12px;
   border: 2px solid var(--primary-light);
   background: var(--bg-color);
   color: var(--primary);
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   outline: none;
   cursor: pointer;
-  max-width: 65%;
+  flex: 1;
+  min-width: 0;
   text-overflow: ellipsis;
 }
 
