@@ -16,101 +16,104 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=28.0">
+  <link rel="stylesheet" href="style.css?v=29.0">
 </head>
 <body>
   <div class="app-container">
-    <!-- Top Header -->
-    <header class="app-header">
-      <div class="brand">
-        <span class="brand-icon">🎓</span>
-        <div class="brand-text">
-          <h1 class="app-title">畢業啦～</h1>
-          <span class="app-subtitle">聖功女中 113 學年度學分檢核</span>
+    <!-- Unified Sticky Top Header Group (整體頁首固定置頂不捲動) -->
+    <header class="sticky-top-header-group">
+      <!-- 1. Top Header -->
+      <div class="app-header">
+        <div class="brand">
+          <span class="brand-icon">🎓</span>
+          <div class="brand-text">
+            <h1 class="app-title">畢業啦～</h1>
+            <span class="app-subtitle">聖功女中 113 學年度學分檢核</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="exportPngBtn" class="cute-pill-btn btn-png" title="下載 PNG 圖片">🖼️ 下載圖片</button>
+          <button id="exportPdfBtn" class="cute-pill-btn btn-pdf" title="下載 PDF 文件">📄 下載 PDF</button>
+          <button id="resetDataBtn" class="icon-btn btn-bomb" title="重置所有數據" aria-label="重置數據">💣</button>
+          <button id="themeToggleBtn" class="icon-btn" title="切換主題" aria-label="切換主題">🌙</button>
         </div>
       </div>
-      <div class="header-actions">
-        <button id="exportPngBtn" class="cute-pill-btn btn-png" title="下載 PNG 圖片">🖼️ 下載圖片</button>
-        <button id="exportPdfBtn" class="cute-pill-btn btn-pdf" title="下載 PDF 文件">📄 下載 PDF</button>
-        <button id="resetDataBtn" class="icon-btn btn-bomb" title="重置所有數據" aria-label="重置數據">💣</button>
-        <button id="themeToggleBtn" class="icon-btn" title="切換主題" aria-label="切換主題">🌙</button>
+
+      <!-- 2. Student Status Bar -->
+      <div class="student-status-bar">
+        <div class="status-row">
+          <div class="status-label">
+            <span class="status-icon">🎒</span>
+            <span>我的年級：</span>
+          </div>
+          <select id="currentGradeSelect" class="grade-select">
+            <option value="1" selected>高一</option>
+            <option value="2">高二</option>
+            <option value="3">高三</option>
+          </select>
+        </div>
+        
+        <div class="status-row">
+          <div class="status-label">
+            <span class="status-icon">🏫</span>
+            <span>我的班別：</span>
+          </div>
+          <select id="trackSelect" class="track-select">
+            <!-- Dynamic JS Population based on Grade -->
+          </select>
+        </div>
+      </div>
+
+      <!-- 3. Fixed Real-Time Credit Dashboard -->
+      <div class="sticky-dashboard">
+        <div class="dashboard-main-ring">
+          <div class="ring-content">
+            <div class="ring-number" id="totalEarnedVal">0</div>
+            <div class="ring-label">/ 150 總學分</div>
+          </div>
+          <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
+        </div>
+
+        <!-- 3 Key Credit Category Bars -->
+        <div class="category-bars-grid">
+          <!-- 1. Compulsory -->
+          <div class="cat-card required-card">
+            <div class="cat-header">
+              <span class="cat-dot"></span>
+              <span class="cat-title">必修</span>
+              <span class="cat-count"><strong id="reqEarnedVal">0</strong> / 102</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill required-fill" id="reqProgressFill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- 2. Elective -->
+          <div class="cat-card elective-card">
+            <div class="cat-header">
+              <span class="cat-dot"></span>
+              <span class="cat-title">選修</span>
+              <span class="cat-count"><strong id="elecEarnedVal">0</strong> / 40</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill elective-fill" id="elecProgressFill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- 3. Other -->
+          <div class="cat-card other-card">
+            <div class="cat-header">
+              <span class="cat-dot"></span>
+              <span class="cat-title">其他必選修</span>
+              <span class="cat-count"><strong id="otherEarnedVal">0</strong> 學分</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill other-fill" id="otherProgressFill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
-
-    <!-- Student Status Bar (預設高一普通班) -->
-    <section class="student-status-bar">
-      <div class="status-row">
-        <div class="status-label">
-          <span class="status-icon">🎒</span>
-          <span>我的年級：</span>
-        </div>
-        <select id="currentGradeSelect" class="grade-select">
-          <option value="1" selected>高一</option>
-          <option value="2">高二</option>
-          <option value="3">高三</option>
-        </select>
-      </div>
-      
-      <div class="status-row">
-        <div class="status-label">
-          <span class="status-icon">🏫</span>
-          <span>我的班別：</span>
-        </div>
-        <select id="trackSelect" class="track-select">
-          <!-- Dynamic JS Population based on Grade -->
-        </select>
-      </div>
-    </section>
-
-    <!-- Fixed Real-Time Credit Dashboard (Sticky) -->
-    <section class="sticky-dashboard">
-      <div class="dashboard-main-ring">
-        <div class="ring-content">
-          <div class="ring-number" id="totalEarnedVal">0</div>
-          <div class="ring-label">/ 150 總學分</div>
-        </div>
-        <div class="badge-status" id="dashShortageBadge">還差 150 學分</div>
-      </div>
-
-      <!-- 3 Key Credit Category Bars -->
-      <div class="category-bars-grid">
-        <!-- 1. Compulsory -->
-        <div class="cat-card required-card">
-          <div class="cat-header">
-            <span class="cat-dot"></span>
-            <span class="cat-title">必修</span>
-            <span class="cat-count"><strong id="reqEarnedVal">0</strong> / 102</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill required-fill" id="reqProgressFill" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <!-- 2. Elective -->
-        <div class="cat-card elective-card">
-          <div class="cat-header">
-            <span class="cat-dot"></span>
-            <span class="cat-title">選修</span>
-            <span class="cat-count"><strong id="elecEarnedVal">0</strong> / 40</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill elective-fill" id="elecProgressFill" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <!-- 3. Other -->
-        <div class="cat-card other-card">
-          <div class="cat-header">
-            <span class="cat-dot"></span>
-            <span class="cat-title">其他必選修</span>
-            <span class="cat-count"><strong id="otherEarnedVal">0</strong> 學分</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill other-fill" id="otherProgressFill" style="width: 0%;"></div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Graduation Warning & Analysis Card -->
     <section class="warning-section">
@@ -193,6 +196,6 @@
     <!-- Rendered dynamically by JS during export -->
   </div>
 
-  <script src="app.js?v=28.0"></script>
+  <script src="app.js?v=29.0"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 聖功女中 113 學年度畢業學分檢核 App - 核心樣式表 (v25.0) */
+/* 畢業啦～ 🎓 聖功女中 113 學年度畢業學分檢核 App - 核心樣式表 (v29.0 頁首整體固定置頂版) */
 
 :root {
   /* Color Palette - Light Macaron Theme */
@@ -83,14 +83,25 @@ html, body {
   padding-bottom: 74px;
 }
 
-/* Header - 單行完美對齊 */
-.app-header {
-  padding: 10px 12px;
+/* 📌 頁首整體固定置頂面板 (Unified Sticky Top Header Group) */
+.sticky-top-header-group {
+  position: sticky;
+  top: 0;
+  z-index: 200;
   background: var(--card-bg);
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.1);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+}
+
+/* 1. Header */
+.app-header {
+  padding: 8px 12px;
+  background: transparent;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px dashed var(--border-color);
   gap: 4px;
 }
 
@@ -103,7 +114,7 @@ html, body {
 }
 
 .brand-icon {
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   line-height: 1;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 8px rgba(108, 92, 231, 0.25));
@@ -114,7 +125,7 @@ html, body {
 }
 
 .app-title {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 900;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
@@ -125,7 +136,7 @@ html, body {
 }
 
 .app-subtitle {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   color: var(--text-sub);
   display: block;
@@ -142,15 +153,15 @@ html, body {
 
 /* Cute Pill Buttons */
 .cute-pill-btn {
-  padding: 5px 8px;
+  padding: 4px 7px;
   border-radius: 12px;
   border: none;
   font-family: inherit;
   font-weight: 800;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   cursor: pointer;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease;
   display: flex;
   align-items: center;
   gap: 3px;
@@ -176,10 +187,10 @@ html, body {
 .icon-btn {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,12 +201,12 @@ html, body {
 
 /* 誇張醒目的炸彈按鈕 💣 */
 .icon-btn.btn-bomb {
-  font-size: 1.25rem;
-  width: 34px;
-  height: 34px;
+  font-size: 1.15rem;
+  width: 32px;
+  height: 32px;
   background: #fff0f3;
   border: 2px solid #ff4757;
-  box-shadow: 0 3px 8px rgba(255, 71, 87, 0.25);
+  box-shadow: 0 2px 6px rgba(255, 71, 87, 0.25);
   flex-shrink: 0;
 }
 
@@ -207,14 +218,14 @@ html, body {
   transform: scale(0.9);
 }
 
-/* Student Status Bar */
+/* 2. Student Status Bar (我的年級與我的班別) */
 .student-status-bar {
-  padding: 10px 16px;
-  background: var(--card-bg);
+  padding: 8px 14px;
+  background: transparent;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  border-bottom: 1px solid var(--border-color);
+  gap: 6px;
+  border-bottom: 1px dashed var(--border-color);
 }
 
 .status-row {
@@ -225,7 +236,7 @@ html, body {
 }
 
 .status-label {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -235,14 +246,14 @@ html, body {
 }
 
 .grade-select, .track-select {
-  padding: 6px 10px;
+  padding: 5px 10px;
   border-radius: 12px;
   border: 2px solid var(--primary-light);
   background: var(--bg-color);
   color: var(--primary);
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   outline: none;
   cursor: pointer;
   width: 65%;
@@ -254,25 +265,19 @@ html, body {
   color: #0984e3;
 }
 
-/* Sticky Real-Time Dashboard */
+/* 3. Real-Time Credit Dashboard */
 .sticky-dashboard {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--card-bg);
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  padding: 10px 14px 12px;
 }
 
 .dashboard-main-ring {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   background: var(--bg-color);
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
 }
@@ -284,22 +289,22 @@ html, body {
 }
 
 .ring-number {
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 900;
   color: var(--primary);
   line-height: 1;
 }
 
 .ring-label {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-sub);
 }
 
 .badge-status {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 20px;
   background: #ffeaa7;
   color: #d63031;
@@ -314,11 +319,11 @@ html, body {
 .category-bars-grid {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .cat-card {
-  padding: 5px 8px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
   background: var(--bg-color);
 }
@@ -327,13 +332,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.78rem;
-  margin-bottom: 3px;
+  font-size: 0.75rem;
+  margin-bottom: 2px;
 }
 
 .cat-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   display: inline-block;
   margin-right: 4px;
@@ -350,7 +355,7 @@ html, body {
 }
 
 .cat-count {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-sub);
 }
 
@@ -360,7 +365,7 @@ html, body {
 
 .progress-track {
   width: 100%;
-  height: 7px;
+  height: 6px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.06);
   overflow: hidden;
