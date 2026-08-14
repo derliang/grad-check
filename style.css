@@ -126,26 +126,7 @@ html, body {
 
 .header-actions {
   display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.action-pill-btn {
-  padding: 6px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-color);
-  color: var(--text-main);
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 0.78rem;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  transition: transform 0.15s ease, background 0.2s ease;
-}
-
-.action-pill-btn:active {
-  transform: scale(0.92);
+  gap: 8px;
 }
 
 .icon-btn {

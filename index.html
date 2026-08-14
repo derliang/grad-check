@@ -9,13 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-  <!-- Canvas Confetti -->
+  <!-- Canvas Confetti for Celebration -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- html2canvas & jsPDF for PNG/PDF Export -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <link rel="stylesheet" href="style.css?v=5.0">
+  <link rel="stylesheet" href="style.css?v=6.0">
 </head>
 <body>
   <div class="app-container">
@@ -29,8 +25,6 @@
         </div>
       </div>
       <div class="header-actions">
-        <button id="exportPngBtn" class="action-pill-btn" title="下載 PNG 圖片">🖼️ 圖片</button>
-        <button id="exportPdfBtn" class="action-pill-btn" title="下載 PDF 文件">📄 PDF</button>
         <button id="themeToggleBtn" class="icon-btn" title="切換主題" aria-label="切換主題">🌙</button>
         <button id="settingsBtn" class="icon-btn" title="設定與資料管理" aria-label="設定與資料管理">⚙️</button>
       </div>
@@ -56,10 +50,10 @@
           <span>班別組別：</span>
         </div>
         <select id="trackSelect" class="track-select">
-          <option value="exp_science" selected>🚀 理組實驗班 (數理科學)</option>
+          <option value="general_humanities">📚 文組普通班 (社會學群)</option>
           <option value="general_science">🔬 理組普通班 (自然學群)</option>
           <option value="exp_humanities">✨ 文組實驗班 (人文語文)</option>
-          <option value="general_humanities">📚 文組普通班 (社會學群)</option>
+          <option value="exp_science">🚀 理組實驗班 (數理科學)</option>
         </select>
       </div>
     </section>
@@ -249,6 +243,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=3.0"></script>
+  <script src="app.js"></script>
 </body>
 </html>

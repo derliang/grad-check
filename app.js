@@ -5,8 +5,8 @@ const STORAGE_KEY = 'grad_check_app_data_v1';
 
 // 預設 108 課綱範本數據
 const DEFAULT_DATA = {
-  currentGrade: 2, // 高一:1, 高二:2, 高三:3
-  track: 'exp_science',
+  currentGrade: 4, // 預設就讀 高二下 (Semester 4)
+  track: 'general_humanities', // 預設組別：文組普通班
   theme: 'light',
   subjects: [
     // === 高一上 (Sem 1) ===
@@ -161,7 +161,7 @@ function bindEvents() {
   // 班別與組別 Selector
   const trackSelect = document.getElementById('trackSelect');
   if (trackSelect) {
-    trackSelect.value = appState.track || 'exp_science';
+    trackSelect.value = appState.track || 'general_humanities';
     trackSelect.addEventListener('change', (e) => {
       appState.track = e.target.value;
       saveStateToLocal();
@@ -196,12 +196,6 @@ function bindEvents() {
 
   document.getElementById('settingsBtn').addEventListener('click', () => openModal('settingsModal'));
   document.getElementById('closeSettingsBtn').addEventListener('click', () => closeModal('settingsModal'));
-
-  // PNG 與 PDF 下載功能
-  const pngBtn = document.getElementById('exportPngBtn');
-  if (pngBtn) pngBtn.addEventListener('click', exportPng);
-  const pdfBtn = document.getElementById('exportPdfBtn');
-  if (pdfBtn) pdfBtn.addEventListener('click', exportPdf);
 
   // 備份與重置
   document.getElementById('resetDataBtn').addEventListener('click', handleResetData);
@@ -586,60 +580,6 @@ function triggerConfetti() {
       spread: 70,
       origin: { y: 0.6 }
     });
-  }
-}
-
-// 🖼️ 下載 PNG 功能 (html2canvas)
-async function exportPng() {
-  try {
-    const target = document.querySelector('.app-container');
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#f6f8fd',
-      logging: false
-    });
-    const link = document.createElement('a');
-    link.download = `畢業啦_學分自我檢核表_${new Date().toISOString().slice(0,10)}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  } catch (err) {
-    alert('圖片匯出失敗：' + err.message);
-  }
-}
-
-// 📄 下載 PDF 功能 (jsPDF + html2canvas)
-async function exportPdf() {
-  try {
-    const target = document.querySelector('.app-container');
-    const canvas = await html2canvas(target, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    });
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const imgWidth = 210;
-    const pageHeight = 297;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    pdf.save(`畢業啦_學分自我檢核表_${new Date().toISOString().slice(0,10)}.pdf`);
-  } catch (err) {
-    alert('PDF 匯出失敗：' + err.message);
   }
 }
 
