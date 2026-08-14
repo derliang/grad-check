@@ -1,130 +1,487 @@
-/* 畢業啦～ 🎓 私立聖功女中 113 學年度畢業學分檢核 App - 核心邏輯 (v25.0) */
+/* 畢業啦～ 🎓 臺南市私立聖功女中 113 學年度畢業學分檢核 App - 核心邏輯 (v26.0 完整資料庫) */
 
 // 本地存儲 Key
 const STORAGE_KEY = 'grad_check_app_data_v1';
 
-// 臺南市私立聖功女中 113 學年度官方標準課程地圖
-const ST_CATHERINE_113_DATABASE = {
-  school: "臺南市私立聖功女中",
+// 臺南市私立聖功女中 113 學年度完整 4 班群 6 學期課程資料庫
+const ST_CATHERINE_113_FULL_DATABASE = {
+  schemaVersion: "1.0",
+  school: { code: "211304", name: "臺南市私立聖功女中" },
   cohortYear: 113,
-  trackDefinitions: {
-    general_g1: "🏫 高一普通班",
-    general_humanities: "📚 普通班人文班群",
-    general_science: "🔬 普通班數理班群",
-    exp_bilingual: "✨ 雙語實驗班",
-    exp_math_science: "🚀 數理實驗班"
+  semesterLabels: { "1": "高一上", "2": "高一下", "3": "高二上", "4": "高二下", "5": "高三上", "6": "高三下" },
+  categoryDefinitions: {
+    required: "必修（含部定必修與校訂必修）",
+    elective: "選修（含加深加廣、補強性、多元選修與實驗班選修課程）"
   },
-  courses: [
-    // === 高一上 (Sem 1) ===
-    { sem: 1, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "數學", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "歷史", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "地理", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "公民與社會", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "基礎物理", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "基礎化學", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "基礎生物", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "資訊科技", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "音樂", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "國際校本-本土篇", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 1, name: "多元選修", credits: 1, cat: "elective", group: "track", tracks: ["general_humanities", "general_science", "exp_bilingual"], mutuallyExclusive: false },
-    { sem: 1, name: "補強-數學", credits: 1, cat: "elective", group: "track", tracks: ["general_humanities", "general_science", "exp_bilingual"], mutuallyExclusive: false },
-    { sem: 1, name: "數學與模型", credits: 2, cat: "elective", group: "track", tracks: ["exp_math_science"], mutuallyExclusive: false },
-
-    // === 高一下 (Sem 2) ===
-    { sem: 2, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "數學", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "歷史", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "地理", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "公民與社會", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "地球科學", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "生活科技", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "家政", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "國際校本-國際篇", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "靈智教育-服務與思辨", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 2, name: "多元選修 II", credits: 2, cat: "elective", group: "common", tracks: ["all"], mutuallyExclusive: false },
-
-    // === 高二上 (Sem 3) ===
-    { sem: 3, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "生命教育", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    
-    { sem: 3, name: "數學B", credits: 4, cat: "required", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
-    { sem: 3, name: "數學A", credits: 4, cat: "required", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
-    { sem: 3, name: "物理Cafe", credits: 1, cat: "elective", group: "track", tracks: ["exp_math_science"], mutuallyExclusive: false },
-    { sem: 3, name: "市場行銷與設計", credits: 1, cat: "elective", group: "track", tracks: ["exp_bilingual"], mutuallyExclusive: false },
-    { sem: 3, name: "探究與實作：自然 (社會)", credits: 2, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "選修物理 / 歷史", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "選修化學 / 地理", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "加深加廣選修", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 3, name: "校訂特色專題", credits: 3, cat: "other", group: "track", tracks: ["all"], mutuallyExclusive: false },
-
-    // === 高二下 (Sem 4) ===
-    { sem: 4, name: "國語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "英語文", credits: 4, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "靈智教育-自我探索", credits: 1, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    
-    { sem: 4, name: "數學B", credits: 4, cat: "required", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
-    { sem: 4, name: "數學A", credits: 4, cat: "required", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
-    { sem: 4, name: "探究與實作：自然 (社會) II", credits: 2, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "選修生物 / 公民 II", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "選修地科 / 社會 II", credits: 3, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "加深加廣選修 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 4, name: "校訂特色專題 II", credits: 3, cat: "other", group: "track", tracks: ["all"], mutuallyExclusive: false },
-
-    // === 高三上 (Sem 5) ===
-    { sem: 5, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 5, name: "團體活動與自主學習", credits: 4, cat: "other", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    
-    { sem: 5, name: "數學乙", credits: 4, cat: "elective", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
-    { sem: 5, name: "數學甲", credits: 4, cat: "elective", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
-    { sem: 5, name: "國語文選修", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 5, name: "英語文選修", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 5, name: "電腦 (生物)", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: true },
-    { sem: 5, name: "加深加廣專門科目", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-
-    // === 高三下 (Sem 6) ===
-    { sem: 6, name: "體育", credits: 2, cat: "required", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 6, name: "自主學習畢業成果專題", credits: 6, cat: "other", group: "common", tracks: ["all"], mutuallyExclusive: false },
-    
-    { sem: 6, name: "數學乙", credits: 4, cat: "elective", group: "track", tracks: ["general_humanities", "exp_bilingual"], mutuallyExclusive: false },
-    { sem: 6, name: "數學甲", credits: 4, cat: "elective", group: "track", tracks: ["general_science", "exp_math_science"], mutuallyExclusive: false },
-    { sem: 6, name: "國語文選修 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 6, name: "英語文選修 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false },
-    { sem: 6, name: "專題閱讀與研究 (閩南語文口語溝通與表達)", credits: 2, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: true },
-    { sem: 6, name: "加深加廣專門科目 II", credits: 4, cat: "elective", group: "track", tracks: ["all"], mutuallyExclusive: false }
-  ]
+  classGroups: {
+    exp_math_science: {
+      label: "數理實驗班",
+      semesters: {
+        "1": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "本土語文 (客語文／閩南語文／原住民族語文／閩東語文／臺灣手語)", credits: 1, cat: "required", mutuallyExclusive: true },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "化學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "生物", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生涯規劃", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "資訊科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "鄉土之愛與國際關懷-本土篇", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "數學與模型", credits: 2, cat: "elective", mutuallyExclusive: false }
+        ],
+        "2": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "本土語文 (客語文／閩南語文／原住民族語文／閩東語文／臺灣手語)", credits: 1, cat: "required", mutuallyExclusive: true },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "物理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地球科學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "資訊科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(一)—服務與思辨", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "鄉土之愛與國際關懷-國際篇", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "科學研究與書寫", credits: 2, cat: "elective", mutuallyExclusive: false }
+        ],
+        "3": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "化學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生命教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-力學一", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-物質與能量", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-細胞與遺傳", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "物理Cafe", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "4": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "物理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(二)—自我探索與發展", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-力學一", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-物質與能量", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-生命的起源與植物體的構造與功能", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "生物Buffet", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "5": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(三)—人際溝通與關係經營", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "英文作文 (第二外國語文)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "數學甲", credits: 4, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-力學二與熱學", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-波動、光及聲音", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-物質構造與反應速率", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-化學反應與平衡一", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-生態、演化及生物多樣性 (領域課程：科技應用專題)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "6": [
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "藝術生活", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(四)—表達力與領導力", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "語文表達與傳播應用", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "專題閱讀與研究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "英語聽講 (第二外國語文)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "數學甲", credits: 4, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-電磁現象一", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-電磁現象二與量子現象", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-化學反應與平衡二", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-有機化學與應用科技", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-動物體的構造與功能 (進階程式設計／健康與休閒生活)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "化學SPA", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ]
+      }
+    },
+    exp_bilingual: {
+      label: "雙語實驗班",
+      semesters: {
+        "1": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "本土語文 (客語文／閩南語文／原住民族語文／閩東語文／臺灣手語)", credits: 1, cat: "required", mutuallyExclusive: true },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "化學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "生物", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生涯規劃", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "資訊科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修 (補強-數學)", credits: 1, cat: "elective", mutuallyExclusive: true },
+          { name: "在地文化與國際議題(I)", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "2": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "本土語文 (客語文／閩南語文／原住民族語文／閩東語文／臺灣手語)", credits: 1, cat: "required", mutuallyExclusive: true },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "物理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地球科學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "資訊科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(一)—服務與思辨", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "多元選修 (補強-數學)", credits: 1, cat: "elective", mutuallyExclusive: true },
+          { name: "在地文化與國際議題(II)", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "科普專題", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "3": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A(B)", credits: 4, cat: "required", mutuallyExclusive: true },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地球科學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生命教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "各類文學選讀", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "探究與實作：地理與人文社會科學研究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "市場行銷與設計", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "4": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A(B)", credits: 4, cat: "required", mutuallyExclusive: true },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "生物", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(二)—自我探索與發展", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "國學常識", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "探究與實作：歷史學探究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "人權足跡", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "5": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(三)—人際溝通與關係經營", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "英文作文", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "數學乙", credits: 4, cat: "elective", mutuallyExclusive: false },
+          { name: "族群、性別與國家的歷史", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "社會環境議題", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "現代社會與經濟", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "創意思考與設計", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "6": [
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "藝術生活", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(四)—表達力與領導力", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "語文表達與傳播應用", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "專題閱讀與研究 (閩南語文口語溝通與表達)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "英語聽講", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "數學乙 (第二外國語文／學群選修)", credits: 4, cat: "elective", mutuallyExclusive: true },
+          { name: "科技、環境與藝術的歷史", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "空間資訊科技", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "民主政治與法律", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "新媒體藝術", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "全球議題秀-心跳的聲音", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ]
+      }
+    },
+    grade1_general: {
+      label: "高一普通班",
+      semesters: {
+        "1": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "本土語文 (客語文／閩南語文／原住民族語文／閩東語文／臺灣手語)", credits: 1, cat: "required", mutuallyExclusive: true },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "化學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "生物", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生涯規劃", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "資訊科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "鄉土之愛與國際關懷-本土篇", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修 (補強-數學)", credits: 1, cat: "elective", mutuallyExclusive: true }
+        ],
+        "2": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "本土語文 (客語文／閩南語文／原住民族語文／閩東語文／臺灣手語)", credits: 1, cat: "required", mutuallyExclusive: true },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "物理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地球科學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "資訊科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(一)—服務與思辨", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "鄉土之愛與國際關懷-國際篇", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修 (補強-數學)", credits: 1, cat: "elective", mutuallyExclusive: true }
+        ]
+      }
+    },
+    grade2_general_science: {
+      label: "高二理組普通班",
+      semesters: {
+        "3": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "化學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生命教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-力學一", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-物質與能量", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-細胞與遺傳", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "4": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "物理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(二)—自我探索與發展", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-力學一", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-物質與能量", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-生命的起源與植物體的構造與功能", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "安全教育與傷害防護 (補強-物理＋補強-化學)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ]
+      }
+    },
+    grade3_general_science: {
+      label: "高三理組普通班",
+      semesters: {
+        "5": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(三)—人際溝通與關係經營", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "英文作文 (第二外國語文)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "數學甲", credits: 4, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-力學二與熱學", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-波動、光及聲音", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-物質構造與反應速率", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-化學反應與平衡一", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-生態、演化及生物多樣性 (領域課程：科技應用專題)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "6": [
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "藝術生活", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(四)—表達力與領導力", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "語文表達與傳播應用", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "專題閱讀與研究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "英語聽講 (第二外國語文)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "數學甲", credits: 4, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-電磁現象一", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修物理-電磁現象二與量子現象", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-化學反應與平衡二", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修化學-有機化學與應用科技", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "選修生物-動物體的構造與功能 (進階程式設計／健康與休閒生活)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ]
+      }
+    },
+    grade2_general_humanities: {
+      label: "高二文組普通班",
+      semesters: {
+        "3": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A(B)", credits: 4, cat: "required", mutuallyExclusive: true },
+          { name: "歷史", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "公民與社會", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "地球科學", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生命教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "各類文學選讀", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "探究與實作：地理與人文社會科學研究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "4": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "數學A(B)", credits: 4, cat: "required", mutuallyExclusive: true },
+          { name: "地理", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "生物", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "音樂", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "生活科技", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(二)—自我探索與發展", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "國學常識", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "英文閱讀與寫作", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "探究與實作：歷史學探究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "探究與實作：公共議題與社會探究", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ]
+      }
+    },
+    grade3_general_humanities: {
+      label: "高三文組普通班",
+      semesters: {
+        "5": [
+          { name: "國語文", credits: 4, cat: "required", mutuallyExclusive: false },
+          { name: "英語文", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(三)—人際溝通與關係經營", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "英文作文", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "數學乙", credits: 4, cat: "elective", mutuallyExclusive: false },
+          { name: "族群、性別與國家的歷史", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "社會環境議題", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "現代社會與經濟", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "基本設計", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ],
+        "6": [
+          { name: "美術", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "藝術生活", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "家政", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "健康與護理", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "體育", credits: 2, cat: "required", mutuallyExclusive: false },
+          { name: "全民國防教育", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "靈智教育(四)—表達力與領導力", credits: 1, cat: "required", mutuallyExclusive: false },
+          { name: "語文表達與傳播應用", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "專題閱讀與研究 (閩南語文口語溝通與表達)", credits: 2, cat: "elective", mutuallyExclusive: true },
+          { name: "英語聽講", credits: 2, cat: "elective", mutuallyExclusive: false },
+          { name: "數學乙 (第二外國語文／學群選修)", credits: 4, cat: "elective", mutuallyExclusive: true },
+          { name: "科技、環境與藝術的歷史", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "空間資訊科技", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "民主政治與法律", credits: 3, cat: "elective", mutuallyExclusive: false },
+          { name: "新媒體藝術", credits: 1, cat: "elective", mutuallyExclusive: false },
+          { name: "多元選修", credits: 1, cat: "elective", mutuallyExclusive: false }
+        ]
+      }
+    }
+  }
 };
 
-// 轉換為 App 內部 Subjects 資料模型
-function convertCoursesToSubjects(courses) {
-  return courses.map((c, idx) => ({
-    id: `sc113_${c.sem}_${idx}`,
-    sem: c.sem,
-    name: c.name,
-    credits: c.credits,
-    cat: c.cat,
-    group: c.group || 'common',
-    tracks: c.tracks || ['all'],
-    mutuallyExclusive: c.mutuallyExclusive || false,
-    passed: c.sem === 1 // 預設高一上及格
-  }));
+// 將全班群 6 個學期完整課程集成為全量 Subjects 庫
+function buildFullSubjectDatabase() {
+  const allSubjects = [];
+  const classGroupKeys = Object.keys(ST_CATHERINE_113_FULL_DATABASE.classGroups);
+
+  classGroupKeys.forEach(groupKey => {
+    const groupObj = ST_CATHERINE_113_FULL_DATABASE.classGroups[groupKey];
+    const semKeys = Object.keys(groupObj.semesters);
+
+    semKeys.forEach(semStr => {
+      const semNum = parseInt(semStr, 10);
+      const courseList = groupObj.semesters[semStr];
+
+      courseList.forEach((c, idx) => {
+        allSubjects.push({
+          id: `sc113_${groupKey}_s${semNum}_${idx}`,
+          groupKey: groupKey,
+          sem: semNum,
+          name: c.name,
+          credits: c.credits,
+          cat: c.cat,
+          group: c.group || (semNum <= 2 ? 'common' : 'track'),
+          mutuallyExclusive: c.mutuallyExclusive || false,
+          passed: semNum === 1 // 預設高一上及格
+        });
+      });
+    });
+  });
+
+  return allSubjects;
 }
 
 const DEFAULT_DATA = {
-  currentGrade: 1, // 預設高一
-  track: 'exp_math_science', // 預設數理實驗班
+  currentGrade: 1,
+  track: 'exp_math_science',
   theme: 'light',
-  subjects: convertCoursesToSubjects(ST_CATHERINE_113_DATABASE.courses)
+  subjects: buildFullSubjectDatabase()
 };
 
-// 班別選單與年級對照表
+// 下拉選單依據就讀年級呈現代碼與標籤
 const TRACK_OPTIONS_BY_GRADE = {
   1: [
     { value: 'exp_math_science', label: '🚀 數理實驗班' },
@@ -221,13 +578,12 @@ function loadStateFromLocal() {
       appState = { ...DEFAULT_DATA, ...parsed };
       
       if (!Array.isArray(appState.subjects) || appState.subjects.length === 0) {
-        appState.subjects = convertCoursesToSubjects(ST_CATHERINE_113_DATABASE.courses);
+        appState.subjects = buildFullSubjectDatabase();
       } else {
         appState.subjects.forEach(sub => {
           if (typeof sub.passed !== 'boolean') sub.passed = false;
           if (typeof sub.credits !== 'number') sub.credits = 2;
           if (!['required', 'elective', 'other'].includes(sub.cat)) sub.cat = 'other';
-          if (!Array.isArray(sub.tracks)) sub.tracks = ['all'];
         });
       }
     } catch (e) {
@@ -275,13 +631,30 @@ function renderTrackOptions() {
   dom.trackSelect.value = appState.track;
 }
 
-// 依當前選擇的班別與年級過濾可見的科目
+// 動態對映當前年級與班別在 JSON 資料庫中的 groupKey 集合
 function getFilteredTrackSubjects() {
   const currentTrack = appState.track || 'exp_math_science';
+
   return appState.subjects.filter(sub => {
-    if (!sub.tracks || sub.tracks.includes('all')) return true;
-    if (currentTrack === 'general_g1') return true;
-    return sub.tracks.includes(currentTrack);
+    const sem = sub.sem;
+    if (sem === 1 || sem === 2) {
+      if (currentTrack === 'general_g1') return sub.groupKey === 'grade1_general';
+      if (currentTrack === 'exp_bilingual') return sub.groupKey === 'exp_bilingual';
+      if (currentTrack === 'exp_math_science') return sub.groupKey === 'exp_math_science';
+      return sub.groupKey === 'grade1_general';
+    } else if (sem === 3 || sem === 4) {
+      if (currentTrack === 'general_humanities') return sub.groupKey === 'grade2_general_humanities';
+      if (currentTrack === 'general_science') return sub.groupKey === 'grade2_general_science';
+      if (currentTrack === 'exp_bilingual') return sub.groupKey === 'exp_bilingual';
+      if (currentTrack === 'exp_math_science') return sub.groupKey === 'exp_math_science';
+      return sub.groupKey === 'grade2_general_science';
+    } else { // sem 5, 6
+      if (currentTrack === 'general_humanities') return sub.groupKey === 'grade3_general_humanities';
+      if (currentTrack === 'general_science') return sub.groupKey === 'grade3_general_science';
+      if (currentTrack === 'exp_bilingual') return sub.groupKey === 'exp_bilingual';
+      if (currentTrack === 'exp_math_science') return sub.groupKey === 'exp_math_science';
+      return sub.groupKey === 'grade3_general_science';
+    }
   });
 }
 
@@ -548,14 +921,14 @@ function renderSubjectList() {
     return;
   }
 
-  const commonSubjects = subjects.filter(s => s.group === 'common' || currentSem <= 2);
-  const trackSubjects = subjects.filter(s => s.group === 'track' && currentSem > 2);
+  const commonSubjects = subjects.filter(s => s.cat === 'required');
+  const trackSubjects = subjects.filter(s => s.cat !== 'required');
 
   let html = '';
 
-  if (trackSubjects.length > 0) {
+  if (trackSubjects.length > 0 && currentSem > 2) {
     if (commonSubjects.length > 0) {
-      html += `<div class="section-divider-title">🏛️ 全校共同科目</div>`;
+      html += `<div class="section-divider-title">🏛️ 部定與校訂必修科目</div>`;
       html += renderSubjectCards(commonSubjects, isLocked);
     }
     html += `<div class="section-divider-title track-section">🔀 班別專屬選修與分流科目</div>`;
@@ -624,7 +997,14 @@ function handleResetData() {
 function generateFullReportHtml() {
   const gradeText = { 1: '高一', 2: '高二', 3: '高三' }[appState.currentGrade] || '高一';
   const currentTrack = appState.track || 'exp_math_science';
-  const trackText = ST_CATHERINE_113_DATABASE.trackDefinitions[currentTrack] || '數理實驗班';
+  const trackLabelMap = {
+    exp_math_science: '🚀 數理實驗班',
+    exp_bilingual: '✨ 雙語實驗班',
+    general_g1: '🏫 高一普通班',
+    general_science: '🔬 普通班數理班群',
+    general_humanities: '📚 普通班人文班群'
+  };
+  const trackText = trackLabelMap[currentTrack] || '數理實驗班';
   const todayStr = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const validSubjects = getFilteredTrackSubjects();
@@ -676,7 +1056,7 @@ function generateFullReportHtml() {
   return `
     <div class="export-report-document">
       <div class="rpt-header-box">
-        <h2 class="rpt-main-title">🎓 私立聖功女中 113 學年度畢業學分自我檢核審查報告書</h2>
+        <h2 class="rpt-main-title">🎓 臺南市私立聖功女中 113 學年度畢業學分自我檢核審查報告書</h2>
         <div class="rpt-meta-row">
           <span>🎒 <strong>我的年級：</strong> ${gradeText}</span>
           <span>🏫 <strong>我的班別：</strong> ${trackText}</span>
