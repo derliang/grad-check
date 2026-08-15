@@ -1,4 +1,4 @@
-/* 畢業啦～ 🎓 聖功女中 113 學年度畢業學分檢核 App - 核心樣式表 (v30.0 堅固置頂修復版) */
+/* 畢業啦～ 🎓 聖功女中 113 學年度畢業學分檢核 App - 核心樣式表 (v1.0.1 語意化版本與頁尾版號版) */
 
 :root {
   /* Color Palette - Light Macaron Theme */
@@ -799,7 +799,16 @@ input:checked + .slider:before {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--primary);
-  margin-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.footer-version {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  opacity: 0.6;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
 }
 
 .footer-alert-box {
